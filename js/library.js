@@ -89,17 +89,31 @@ function hashCode(s) {
   return Math.abs(h);
 }
 
-function spineShelf(finished, state) {
-  const spines = [...finished]
-    .sort((a, b) => ((a.finishDate || "") < (b.finishDate || "") ? -1 : 1)) // shelf fills left → right
+// Anchor: a 300-pp* book is an average 34px spine, ±1px per 20 pp*.
+// Slivers clamp at 18px (early DNFs), doorstops at 88px.
+function spineWidth(star) {
+  return Math.max(18, Math.min(88, Math.round(34 + 0.05 * (star - 300))));
+}
+
+// One shelf for both fates. mode "finished": width = the whole book (total pages*).
+// mode "dnf": width = only the pages* actually reached before abandoning.
+function spineShelf(books, state, mode) {
+  const dateKey = mode === "dnf" ? "dnfDate" : "finishDate";
+  const spines = [...books]
+    .sort((a, b) => ((a[dateKey] || "") < (b[dateKey] || "") ? -1 : 1)) // shelf fills left → right
     .map((b) => {
-      const star = pagesStar(b, state.gWpp) ?? b.totalPages ?? 320;
-      const w = Math.max(24, Math.min(68, Math.round(18 + 0.05 * star)));
+      const pos = currentPosition(b, state.entries);
+      const star = mode === "dnf"
+        ? Math.round(pos * starFactor(b, state.gWpp))
+        : pagesStar(b, state.gWpp) ?? b.totalPages ?? 320;
       const h = 150 + (hashCode(b.id) % 4) * 10;
       const color = bookColor(b, state);
       const ink = luma(color) > 125 ? "var(--ink)" : "var(--eggshell)";
-      const tip = `${b.title} — ${b.author}${b.finishDate ? ", finished " + fmtLong(b.finishDate) : ""}`;
-      return `<div class="spine" style="width:${w}px;height:${h}px;background:${color};color:${ink}" title="${esc(tip)}"><span class="t">${esc(b.title)}</span></div>`;
+      const when = b[dateKey] ? fmtLong(b[dateKey]) : "";
+      const tip = mode === "dnf"
+        ? `${b.title} — ${b.author}, DNF at p. ${pos} of ${b.totalPages ?? "?"}${when ? ", " + when : ""}`
+        : `${b.title} — ${b.author}${when ? ", finished " + when : ""}`;
+      return `<div class="spine" style="width:${spineWidth(star)}px;height:${h}px;background:${color};color:${ink}" title="${esc(tip)}"><span class="t">${esc(b.title)}</span></div>`;
     })
     .join("");
   return `<div class="spine-shelf"><div class="spine-inner"><div class="spine-row">${spines}</div><div class="shelf-board"></div></div></div>`;
@@ -116,6 +130,13 @@ export function renderLibrary(state) {
     : '<p class="empty-note">Nothing on the go. Pick something from the queue.</p>';
 
   document.getElementById("finished-shelf").innerHTML = finished.length
-    ? spineShelf(finished, state) + `<div class="shelf">${finished.map((b) => shelfSlot(b, state)).join("")}</div>`
+    ? spineShelf(finished, state, "finished") + `<div class="shelf">${finished.map((b) => shelfSlot(b, state)).join("")}</div>`
     : '<p class="empty-note">Nothing finished since Day 0 (July 26, 2026). The shelf awaits.</p>';
+
+  // Did Not Finish: spines only (width = pages reached), section hidden entirely
+  // until the first casualty.
+  const dnf = state.books.filter((b) => b.status === "dnf");
+  document.getElementById("dnf-section").innerHTML = dnf.length
+    ? `<h2>Did Not Finish</h2>${spineShelf(dnf, state, "dnf")}`
+    : "";
 }

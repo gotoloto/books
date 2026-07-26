@@ -69,6 +69,22 @@ It moves to the Finished shelf; its series stays in the charts. `finishDate` als
 drives the finish pennant on the cumulative chart and the book's spine on the
 spine shelf, and `color` paints both — so a finished book must have both fields.
 
+## DNF-ing a book (did not finish)
+
+Only when Travis explicitly declares it — never infer a DNF from silence. In
+`data/books.json`: set `status: "dnf"` and add `dnfDate: "YYYY-MM-DD"`. Leave the
+log entries alone: the reading happened, so it keeps counting in every stat (series,
+dots, heatmap, records). The book appears on the Library's **"Did Not Finish"**
+shelf (heading always spelled out; "DNF" shorthand only in compact spots like spine
+tooltips) as a spine whose width reflects only the position reached, not the whole
+book. A DNF book never has `finishDate` (and gets no chart pennant).
+
+Un-DNF (he picks it back up): `status: "reading"`, delete `dnfDate`; logging resumes
+from the last position as usual.
+
+Spine widths on both shelves come from `spineWidth()` in js/library.js: 34px for a
+300-pp* book, ±1px per 20 pp*, clamped 18–88.
+
 ## Starting a new book
 
 Collect/derive, then fill the book's entry (planned books already exist with nulls):
