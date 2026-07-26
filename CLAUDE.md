@@ -123,6 +123,9 @@ js/stats.js       records strip, cumulative chart, daily scatter, log table, PAL
 data/books.json   one entry per book (see fields above)
 data/log.json     append-only reading log
 covers/*.jpg      local cover images, lowercase filenames
+manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
+                  checkerboard icon; deliberately NO service worker — data must
+                  always be network-fresh)
 ```
 
 ## Conventions & gotchas
