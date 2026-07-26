@@ -1,4 +1,6 @@
 {
   "schema": 1,
-  "entries": []
+  "entries": [
+    { "date": "2026-07-26", "book": "2666", "from": 410, "to": 419 }
+  ]
 }
