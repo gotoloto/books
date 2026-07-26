@@ -112,6 +112,11 @@ Adding a brand-new planned book: append to `books` with `status:"planned"` and n
 fetch its cover the same way. Array order of planned books = default queue rank
 (browser drag-and-drop order overrides locally via localStorage).
 
+Queue order does NOT sync between devices (localStorage is per-browser). When Travis
+asks to persist a ranking — by listing it, screenshotting his queue, or "move X to
+#2" — reorder the planned entries in books.json to match and push. That commit is
+the sync mechanism.
+
 ## pages vs pages* (the whole point of the site)
 
 - **pages** (no asterisk) = the book's actual page numbers. Used in user reports,
