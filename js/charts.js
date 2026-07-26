@@ -2,6 +2,7 @@
 // full re-render on every change — the data is tiny.
 
 import { addDays, diffDays, fmtShort, fmtMonth, fmtMonthYear, fmtLong, fromUTCms, mondayOf } from "./derive.js";
+import { dateWord, sessionWord, totalWord } from "./prose.js";
 
 const NS = "http://www.w3.org/2000/svg";
 
@@ -84,7 +85,7 @@ export function tooltipHide() {
 
 const M = { top: 16, right: 20, bottom: 32, left: 52 };
 
-function frame(container, height, winStart, winEnd, maxVal, unitLabel) {
+function frame(container, height, winStart, winEnd, maxVal, unitLabel, prose) {
   container.innerHTML = "";
   const width = Math.max(320, container.clientWidth);
   const innerW = width - M.left - M.right;
@@ -102,9 +103,11 @@ function frame(container, height, winStart, winEnd, maxVal, unitLabel) {
   for (const t of ticks) {
     const yy = Math.round(y(t)) + 0.5;
     g.appendChild(el("line", { x1: M.left, x2: width - M.right, y1: yy, y2: yy, stroke: "#D8CBAA", "stroke-width": 1 }));
-    const lbl = el("text", { x: M.left - 8, y: yy + 4, "text-anchor": "end", "font-size": 12.5 });
-    lbl.textContent = String(t);
-    svg.appendChild(lbl);
+    if (!prose) {
+      const lbl = el("text", { x: M.left - 8, y: yy + 4, "text-anchor": "end", "font-size": 12.5 });
+      lbl.textContent = String(t);
+      svg.appendChild(lbl);
+    }
   }
   // baseline
   g.appendChild(el("line", {
@@ -114,17 +117,23 @@ function frame(container, height, winStart, winEnd, maxVal, unitLabel) {
   }));
 
   const { dates, fmt } = dateTicks(winStart, winEnd, innerW);
+  let prevLabel = null;
   for (const d of dates) {
     const xx = Math.round(x(d)) + 0.5;
     g.appendChild(el("line", { x1: xx, x2: xx, y1: height - M.bottom, y2: height - M.bottom + 4, stroke: "#4A523F", "stroke-width": 1 }));
+    const text = prose ? dateWord(d) : fmt(d);
+    if (prose && text === prevLabel) continue; // "mid-July, mid-July" reads badly
+    prevLabel = text;
     const lbl = el("text", { x: xx, y: height - M.bottom + 18, "text-anchor": "middle", "font-size": 12.5 });
-    lbl.textContent = fmt(d);
+    lbl.textContent = text;
     svg.appendChild(lbl);
   }
 
-  const unit = el("text", { x: M.left + 8, y: M.top + 14, "text-anchor": "start", "font-size": 12.5, "font-style": "italic" });
-  unit.textContent = unitLabel;
-  svg.appendChild(unit);
+  if (!prose) {
+    const unit = el("text", { x: M.left + 8, y: M.top + 14, "text-anchor": "start", "font-size": 12.5, "font-style": "italic" });
+    unit.textContent = unitLabel;
+    svg.appendChild(unit);
+  }
 
   return { svg, width, height, x, y, top, innerW, innerH };
 }
@@ -134,13 +143,13 @@ function frame(container, height, winStart, winEnd, maxVal, unitLabel) {
 // (largest painted first, so smaller books land on top and stay visible).
 
 export function renderCumulative(container, series, opts) {
-  const { winStart, winEnd, today, unitLabel } = opts;
+  const { winStart, winEnd, today, unitLabel, prose } = opts;
   if (!series.length) {
     container.innerHTML = `<div class="chart-empty">No reading logged in this window.</div>`;
     return;
   }
   const maxVal = Math.max(...series.map((s) => s.final));
-  const f = frame(container, 340, winStart, winEnd, maxVal, unitLabel);
+  const f = frame(container, 340, winStart, winEnd, maxVal, unitLabel, prose);
 
   const drawEnd = winEnd < today ? winEnd : today; // never draw into the future
 
@@ -180,7 +189,7 @@ export function renderCumulative(container, series, opts) {
     flag.appendChild(el("rect", { x: qx, y: fy + 5, width: 5, height: 5, fill: "#F0EAD6" }));
     flag.appendChild(el("rect", { x: qx, y: fy, width: 10, height: 10, fill: "none", stroke: "#1E2A1E", "stroke-width": 1 }));
     const t = el("title");
-    t.textContent = `${s.title} — finished ${fmtLong(s.finishDate)}`;
+    t.textContent = `${s.title} — finished ${prose ? dateWord(s.finishDate) : fmtLong(s.finishDate)}`;
     flag.appendChild(t);
     f.svg.appendChild(flag);
   }
@@ -211,9 +220,11 @@ export function renderCumulative(container, series, opts) {
       })
       .filter((r) => r.v > 0)
       .sort((a, b) => b.v - a.v)
-      .map((r) => `<span style="color:${r.color}">■</span> ${esc(r.title)} — <b>${Math.round(r.v)}</b>${r.finishedHere ? "&nbsp;· finished" : ""}`)
+      .map((r) => prose
+        ? `<span style="color:${r.color}">■</span> ${esc(r.title)} — ${totalWord(r.v)}${r.finishedHere ? "&nbsp;· finished" : ""}`
+        : `<span style="color:${r.color}">■</span> ${esc(r.title)} — <b>${Math.round(r.v)}</b>${r.finishedHere ? "&nbsp;· finished" : ""}`)
       .join("<br>");
-    tooltipShow(container, `<span class="tt-date">${fmtLong(best)}</span>${rows || "—"}`, e.clientX, e.clientY);
+    tooltipShow(container, `<span class="tt-date">${prose ? dateWord(best) : fmtLong(best)}</span>${rows || "—"}`, e.clientX, e.clientY);
   });
   f.svg.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); tooltipHide(); });
 }
@@ -224,13 +235,13 @@ export function renderCumulative(container, series, opts) {
 // the 7-day rolling mean as a dashed line.
 
 export function renderDaily(container, points, opts) {
-  const { winStart, winEnd, unitLabel, pace = [] } = opts;
+  const { winStart, winEnd, unitLabel, pace = [], prose } = opts;
   if (!points.length) {
     container.innerHTML = `<div class="chart-empty">No reading logged in this window.</div>`;
     return;
   }
   const maxVal = Math.max(...points.map((p) => p.v), ...pace.map((p) => p.v));
-  const f = frame(container, 280, winStart, winEnd, maxVal, unitLabel);
+  const f = frame(container, 280, winStart, winEnd, maxVal, unitLabel, prose);
 
   const meta = [];
   const stems = el("g");
@@ -248,7 +259,7 @@ export function renderDaily(container, points, opts) {
     }));
     const cap = document.createElement("p");
     cap.className = "footnote";
-    cap.textContent = "– – 7-day rolling pace (pp*/day)";
+    cap.textContent = prose ? "– – the shape of the week" : "– – 7-day rolling pace (pp*/day)";
     container.appendChild(cap);
   }
   const y0 = f.y(0).toFixed(1);
@@ -266,6 +277,14 @@ export function renderDaily(container, points, opts) {
   }
 
   const showPoint = (p, e) => {
+    if (prose) {
+      tooltipShow(
+        container,
+        `<span class="tt-date">${dateWord(p.date)}</span><b>${esc(p.title)}</b><br>${sessionWord(p.v)}`,
+        e.clientX, e.clientY
+      );
+      return;
+    }
     // Day granularity: sessions merge into one contiguous range (continuity rule).
     const range = `pp.&nbsp;${p.ranges[0][0]}–${p.ranges[p.ranges.length - 1][1]}`;
     tooltipShow(
@@ -293,7 +312,7 @@ const HEAT_LABELS = ["0", "1–14", "15–29", "30–49", "50+"];
 const heatBin = (v) => (v <= 0 ? 0 : v < 15 ? 1 : v < 30 ? 2 : v < 50 ? 3 : 4);
 
 export function renderHeatmap(container, perDay, opts) {
-  const { today } = opts;
+  const { today, prose } = opts;
   container.innerHTML = "";
   const CELL = 13, PITCH = 16, LEFT = 34, TOP = 18;
   const start = mondayOf(addDays(today, -364)); // Monday on/before one year ago
@@ -358,7 +377,9 @@ export function renderHeatmap(container, perDay, opts) {
     const m = meta[Number(hit.getAttribute("data-i"))];
     tooltipShow(
       container,
-      `<span class="tt-date">${fmtLong(m.date)}</span><b>${Math.round(m.star)} pp*</b> · ${esc(m.titles.join(", "))}`,
+      prose
+        ? `<span class="tt-date">${dateWord(m.date)}</span><b>${sessionWord(m.star)}</b> · ${esc(m.titles.join(", "))}`
+        : `<span class="tt-date">${fmtLong(m.date)}</span><b>${Math.round(m.star)} pp*</b> · ${esc(m.titles.join(", "))}`,
       e.clientX, e.clientY
     );
   };
@@ -368,10 +389,15 @@ export function renderHeatmap(container, perDay, opts) {
 
   const legend = document.createElement("div");
   legend.className = "heat-legend";
-  legend.innerHTML =
-    HEAT_BINS.map((c, i) =>
-      `<span class="cell" style="background:${c}${i === 0 ? ";border:1px solid #C7B58F" : ""}"></span>${HEAT_LABELS[i]}`
-    ).join(" ") + " pp*";
+  legend.innerHTML = prose
+    ? "quiet " +
+      HEAT_BINS.map((c, i) =>
+        `<span class="cell" style="background:${c}${i === 0 ? ";border:1px solid #C7B58F" : ""}"></span>`
+      ).join("") +
+      " devoted"
+    : HEAT_BINS.map((c, i) =>
+        `<span class="cell" style="background:${c}${i === 0 ? ";border:1px solid #C7B58F" : ""}"></span>${HEAT_LABELS[i]}`
+      ).join(" ") + " pp*";
   container.appendChild(legend);
 
   // Open scrolled to today (the right edge) on narrow screens.

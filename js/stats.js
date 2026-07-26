@@ -3,10 +3,18 @@ import {
   fmtLong, fmtMonthYear, fmtShort, perDayTotals, records, starFactor,
 } from "./derive.js";
 import { renderCumulative, renderDaily, renderHeatmap } from "./charts.js";
+import {
+  isProse, cap, dateWord, monthName, sessionWord, streakWord, totalWord, weekWord, monthWord,
+} from "./prose.js";
 
 // Validated series palette — fixed assignment order, never shuffled.
 const PALETTE = ["#3A7A33", "#C99414", "#4C74B8", "#C0552D", "#1B9488", "#A26320", "#A0538F", "#8A941F"];
 const PRESETS = [["2w", 14], ["1m", 30], ["3m", 91], ["1y", 365], ["all", null]];
+// count-mode label / prose-mode label
+const PRESET_LABELS = {
+  "2w": ["2W", "FORTNIGHT"], "1m": ["1M", "MONTH"], "3m": ["3M", "SEASON"],
+  "1y": ["1Y", "YEAR"], "all": ["ALL", "ALWAYS"],
+};
 const DAY0 = "2026-07-26";
 
 const ui = { preset: "1m", unit: "star", customStart: null, customEnd: null, built: false };
@@ -60,7 +68,7 @@ function buildControls(state) {
     const b = document.createElement("button");
     b.className = "btn";
     b.dataset.preset = key;
-    b.textContent = key.toUpperCase();
+    b.textContent = PRESET_LABELS[key][0];
     b.addEventListener("click", () => {
       ui.preset = key;
       renderCharts(state);
@@ -117,6 +125,7 @@ function buildControls(state) {
 function syncControls() {
   for (const b of document.querySelectorAll("#controls .btn[data-preset]")) {
     b.setAttribute("aria-pressed", String(b.dataset.preset === ui.preset));
+    b.textContent = PRESET_LABELS[b.dataset.preset][isProse() ? 1 : 0];
   }
   for (const b of document.querySelectorAll("#controls .btn[data-unit]")) {
     b.setAttribute("aria-pressed", String(b.dataset.unit === ui.unit));
@@ -125,6 +134,33 @@ function syncControls() {
 
 function renderRecords(state) {
   const r = records(state.daily, state.books, state.gWpp, state.today);
+  if (isProse()) {
+    const t = state.today;
+    const tiles = [
+      {
+        val: r.bestDay ? cap(sessionWord(r.bestDay.value)) : "Nothing yet",
+        lbl: r.bestDay ? `best day · ${dateWord(r.bestDay.date, t)}` : "best day",
+      },
+      {
+        val: r.bestWeek ? cap(weekWord(r.bestWeek.value)) : "Nothing yet",
+        lbl: r.bestWeek ? `best week · ${dateWord(r.bestWeek.start, t)}` : "best week",
+      },
+      {
+        val: r.bestMonth ? cap(monthWord(r.bestMonth.value)) : "Nothing yet",
+        lbl: r.bestMonth ? `best month · ${monthName(r.bestMonth.ym, t)}` : "best month",
+      },
+      {
+        val: r.longestStreak ? cap(streakWord(r.longestStreak.len)) : "Nothing yet",
+        lbl: r.longestStreak ? `longest streak · around ${dateWord(r.longestStreak.start, t)}` : "longest streak",
+      },
+      { val: cap(streakWord(r.streak)), lbl: "current streak" },
+      { val: cap(totalWord(r.total)), lbl: "since the beginning" },
+    ];
+    document.getElementById("records").innerHTML = tiles
+      .map((x) => `<div class="tile"><div class="checker" aria-hidden="true"></div><div class="val">${x.val}</div><div class="lbl">${x.lbl}</div></div>`)
+      .join("");
+    return;
+  }
   const days = (n) => `${n} <small>${n === 1 ? "day" : "days"}</small>`;
   const tiles = [
     {
@@ -191,7 +227,7 @@ function renderCharts(state) {
     .join("");
 
   renderCumulative(document.getElementById("chart-a"), series, {
-    winStart: ws, winEnd: we, today: state.today, unitLabel,
+    winStart: ws, winEnd: we, today: state.today, unitLabel, prose: isProse(),
   });
 
   const pts = dailyPoints(state.daily, ws, we).map((p) => {
@@ -216,7 +252,7 @@ function renderCharts(state) {
     pace.push({ date: d, v: sum / 7 });
   }
   renderDaily(document.getElementById("chart-b"), pts, {
-    winStart: ws, winEnd: we, unitLabel: "pages*", pace,
+    winStart: ws, winEnd: we, unitLabel: "pages*", pace, prose: isProse(),
   });
 }
 
@@ -225,6 +261,10 @@ function renderNormNote(state) {
   const el = document.getElementById("norm-note");
   if (!state.gWpp) {
     el.textContent = "";
+    return;
+  }
+  if (isProse()) {
+    el.textContent = "* pages here are weighed against the true page — but today we go by feel.";
     return;
   }
   const one = measured.length === 1 ? " With a single measured book, pages = pages*." : "";
@@ -256,6 +296,20 @@ function renderLogTable(state) {
     }
   }
   rows.sort((a, b) => (a.date === b.date ? (a.title < b.title ? -1 : 1) : a.date < b.date ? 1 : -1));
+  if (isProse()) {
+    const html = rows
+      .map((r) => `<tr>
+        <td>${cap(dateWord(r.date, state.today))}</td>
+        <td>${esc(r.title)}</td>
+        <td>${cap(sessionWord(r.star))}</td>
+      </tr>`)
+      .join("");
+    box.innerHTML = `<table class="log">
+      <thead><tr><th>When</th><th>Book</th><th>How it went</th></tr></thead>
+      <tbody>${html}</tbody>
+    </table>`;
+    return;
+  }
   const html = rows
     .map((r) => `<tr>
         <td>${fmtLong(r.date)}</td>
@@ -275,7 +329,7 @@ export function renderStats(state) {
   perDay = perDayTotals(state.daily, state.books, state.gWpp);
   buildControls(state);
   renderRecords(state);
-  renderHeatmap(document.getElementById("heatmap"), perDay, { today: state.today });
+  renderHeatmap(document.getElementById("heatmap"), perDay, { today: state.today, prose: isProse() });
   renderCharts(state);
   renderNormNote(state);
   renderLogTable(state);

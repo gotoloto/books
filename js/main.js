@@ -2,6 +2,7 @@ import { buildDaily, globalWpp, todayISO } from "./derive.js";
 import { renderLibrary } from "./library.js";
 import { renderQueue } from "./queue.js";
 import { renderStats } from "./stats.js";
+import { isProse, toggleProse } from "./prose.js";
 
 const VIEWS = ["library", "queue", "stats"];
 const state = {};
@@ -51,11 +52,30 @@ async function boot() {
   state.today = todayISO();
   state.ready = true;
 
+  document.body.classList.toggle("prose", isProse());
   renderLibrary(state);
   renderQueue(state);
   route();
 
   window.addEventListener("hashchange", route);
+
+  // The easter egg: five quick taps on the header checkerboard put the numbers
+  // to sleep (prose mode) — five more wake them. The footer whispers the way back.
+  const strip = document.querySelector("header .checker");
+  let taps = [];
+  strip.addEventListener("click", () => {
+    const now = Date.now();
+    taps = taps.filter((t) => now - t < 2500);
+    taps.push(now);
+    if (taps.length >= 5) {
+      taps = [];
+      toggleProse();
+      document.body.classList.toggle("prose", isProse());
+      renderLibrary(state);
+      renderQueue(state);
+      if (currentView() === "stats") renderStats(state);
+    }
+  });
 
   let t = null;
   window.addEventListener("resize", () => {

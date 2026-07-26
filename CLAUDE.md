@@ -133,6 +133,17 @@ the sync mechanism.
   whenever a new book is measured, retroactively (and intentionally) rescaling history.
 - Anything displayed in pages* carries the asterisk (`pp*`). Keep that convention.
 
+## Prose mode (easter egg)
+
+Tapping the header checkerboard strip five times within ~2.5 s toggles **prose
+mode**: every digit on the site goes to sleep and the same information renders as
+qualitative descriptors ("On page 424 of 893" → "About halfway through"; book
+titles like "2666" are the only exemption). The lexicon and mode store live in
+`js/prose.js` (localStorage `books:mode:v1`); every renderer branches on
+`isProse()`. The footer whispers the way back while prose mode is on.
+**Rule: any new UI must include a prose branch — no digits may render in prose
+mode.** Bucket thresholds in prose.js are editorial and tunable.
+
 ## Files
 
 ```
@@ -143,6 +154,7 @@ js/main.js        fetch (no-cache), router, error banner
 js/library.js     reading cards + finished shelf
 js/queue.js       drag-drop ranking, localStorage `books:queue-order:v1`
 js/charts.js      hand-rolled SVG primitives + tooltip
+js/prose.js       prose-mode store + the number→word lexicon
 js/stats.js       records strip, cumulative chart, daily scatter, log table, PALETTE
 data/books.json   one entry per book (see fields above)
 data/log.json     append-only reading log

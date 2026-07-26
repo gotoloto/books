@@ -464,6 +464,35 @@ table.log td.num, table.log th.num { text-align: right; }
 
 footer { margin-top: 40px; }
 
+/* ——— prose mode (the easter egg: numbers asleep) ——— */
+body.prose #controls input[type="date"],
+body.prose #controls .lbl-sm,
+body.prose .unit-switch { display: none; }
+body.prose .tile .val {
+  font-size: 19px;
+  font-style: italic;
+  font-weight: 600;
+  line-height: 1.35;
+  padding-top: 12px;
+}
+body.prose .q-row .rank {
+  width: auto;
+  min-width: 76px;
+  font-size: 13px;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.08em;
+}
+.prose-note {
+  display: none;
+  text-align: center;
+  font-style: italic;
+  color: var(--ink-soft);
+  font-size: 14px;
+  margin: 0;
+  padding: 8px 20px 14px;
+}
+body.prose .prose-note { display: block; }
+
 /* ——— small screens ——— */
 @media (max-width: 700px) {
   body { font-size: 16px; }

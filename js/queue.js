@@ -4,6 +4,9 @@
 
 import { currentPosition, recentPacePages } from "./derive.js";
 import { spineWidth, hashCode } from "./library.js";
+import {
+  isProse, cap, countBooksWord, durationWord, lengthWord, ordinalWord, paceWord,
+} from "./prose.js";
 
 const KEY = "books:queue-order:v1";
 
@@ -43,6 +46,18 @@ function renderEta(planned, state, pace) {
     .filter((b) => b.status === "reading" && Number.isFinite(b.totalPages))
     .reduce((a, b) => a + (b.totalPages - currentPosition(b, state.entries)), 0);
 
+  if (isProse()) {
+    let text = `<b>${cap(countBooksWord(planned.length))}</b>`;
+    if (unknown) text += ` (some pages uncounted)`;
+    if (pace > 0) {
+      text += ` — ${durationWord(total / pace)} of reading ${paceWord(pace)}`;
+      if (onTheGo > 0) text += `, waiting behind what's still on the go`;
+    } else {
+      text += ` — the clock starts with the first logged page`;
+    }
+    box.innerHTML = text + ".";
+    return;
+  }
   let text = `<b>${planned.length}</b> book${planned.length === 1 ? "" : "s"} · ~<b>${total.toLocaleString()}</b> pages`;
   if (unknown) text += ` (${unknown} uncounted)`;
   if (pace > 0) {
@@ -67,7 +82,9 @@ function renderShelf(order, byId) {
       const b = byId.get(id);
       const star = Number.isFinite(b.totalPages) ? b.totalPages : 300;
       const h = 150 + (hashCode(b.id) % 4) * 10;
-      const tip = `${b.title} — ${b.author}${Number.isFinite(b.totalPages) ? `, ~${b.totalPages} pp` : ""}`;
+      const tip = isProse()
+        ? `${b.title} — ${b.author}, ${lengthWord(star)}`
+        : `${b.title} — ${b.author}${Number.isFinite(b.totalPages) ? `, ~${b.totalPages} pp` : ""}`;
       return `<div class="spine" style="width:${spineWidth(star)}px;height:${h}px;background:${QUEUE_TANS[i % 2]};color:var(--ink)" title="${esc(tip)}"><span class="t">${esc(b.title)}</span></div>`;
     })
     .join("");
@@ -104,9 +121,13 @@ export function renderQueue(state) {
         const b = byId.get(id);
         return `
       <li class="q-row" draggable="true" data-id="${esc(id)}">
-        <span class="rank">${String(i + 1).padStart(2, "0")}</span>
+        <span class="rank">${isProse() ? ordinalWord(i + 1) : String(i + 1).padStart(2, "0")}</span>
         <span class="thumb"><img src="${esc(b.cover)}" alt="" loading="lazy"></span>
-        <span class="meta"><b>${esc(b.title)}</b><span>${esc(b.author)}${Number.isFinite(b.totalPages) ? ` · ~${b.totalPages} pp` : ""}${Number.isFinite(b.totalPages) && pace > 0 ? ` · ≈ ${Math.ceil(b.totalPages / pace)} days` : ""}</span></span>
+        <span class="meta"><b>${esc(b.title)}</b><span>${esc(b.author)}${
+          isProse()
+            ? `${Number.isFinite(b.totalPages) ? ` · ${lengthWord(b.totalPages)}` : ""}${Number.isFinite(b.totalPages) && pace > 0 ? ` · ${durationWord(b.totalPages / pace)}` : ""}`
+            : `${Number.isFinite(b.totalPages) ? ` · ~${b.totalPages} pp` : ""}${Number.isFinite(b.totalPages) && pace > 0 ? ` · ≈ ${Math.ceil(b.totalPages / pace)} days` : ""}`
+        }</span></span>
         <span class="grip" aria-hidden="true">::::</span>
       </li>`;
       })
@@ -114,6 +135,13 @@ export function renderQueue(state) {
   }
 
   let dragId = null;
+
+  // renderQueue re-runs on prose-mode toggles — never wire the listeners twice.
+  if (list.dataset.wired) {
+    draw();
+    return;
+  }
+  list.dataset.wired = "1";
 
   list.addEventListener("dragstart", (e) => {
     const row = e.target.closest(".q-row");
