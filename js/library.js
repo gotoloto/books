@@ -83,7 +83,7 @@ function luma(hex) {
   return (((n >> 16) & 255) * 299 + (((n >> 8) & 255) * 587) + (n & 255) * 114) / 1000;
 }
 
-function hashCode(s) {
+export function hashCode(s) {
   let h = 0;
   for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0;
   return Math.abs(h);
@@ -91,7 +91,8 @@ function hashCode(s) {
 
 // Anchor: a 300-pp* book is an average 34px spine, ±1px per 20 pp*.
 // Slivers clamp at 18px (early DNFs), doorstops at 88px.
-function spineWidth(star) {
+// Exported with hashCode for the queue's shelf preview (same shelf rules).
+export function spineWidth(star) {
   return Math.max(18, Math.min(88, Math.round(34 + 0.05 * (star - 300))));
 }
 
