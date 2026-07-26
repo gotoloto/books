@@ -89,7 +89,9 @@ Spine widths on both shelves come from `spineWidth()` in js/library.js: 34px for
 
 Collect/derive, then fill the book's entry (planned books already exist with nulls):
 
-1. `totalPages` — the physical copy's last numbered page (ask Travis).
+1. `totalPages` — the physical copy's last numbered page (ask Travis). Planned
+   entries already carry a **Goodreads estimate** (for the queue ETA) — always
+   re-confirm against the physical copy when the book starts; they often differ.
 2. `startPage` — 0 unless starting mid-book, `startDate` — first tracked day.
 3. `wordsPerPage` — ask Travis for photos of ~5 representative pages, dropped in a
    folder named like `<book> pages/` (anything matching `* pages/` is gitignored —
@@ -108,8 +110,9 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
    `covers/<id>.jpg` — **lowercase** (Pages is case-sensitive), real JPEG, ≤900px tall
    (`sips -Z 900 -s format jpeg`). Prefer the edition Travis owns.
 
-Adding a brand-new planned book: append to `books` with `status:"planned"` and nulls,
-fetch its cover the same way. Array order of planned books = default queue rank
+Adding a brand-new planned book: append to `books` with `status:"planned"`, fetch its
+cover the same way, and set `totalPages` to the Goodreads record's page count (the
+autocomplete response's `numPages`) so the queue ETA stays honest; other fields null. Array order of planned books = default queue rank
 (browser drag-and-drop order overrides locally via localStorage).
 
 Queue order does NOT sync between devices (localStorage is per-browser). When Travis

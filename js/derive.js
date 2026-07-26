@@ -198,6 +198,22 @@ export function records(byBook, books, gWpp, today) {
   return { bestDay, bestWeek, bestMonth, streak, longestStreak, total, daysRead: perDay.size };
 }
 
+// ——— recent pace (actual pages/day, all books) ———
+// Trailing-14-day mean in raw pages; denominator shrinks while history is young
+// (mirrors forecast()). Raw pages because queue estimates have no measured wpp.
+export function recentPacePages(entries, today) {
+  if (!entries.length) return 0;
+  let first = entries[0].date;
+  for (const e of entries) if (e.date < first) first = e.date;
+  const denom = Math.min(14, Math.max(1, diffDays(first, today) + 1));
+  const cutoff = addDays(today, -(denom - 1));
+  let pages = 0;
+  for (const e of entries) {
+    if (e.date >= cutoff && e.date <= today) pages += e.to - e.from;
+  }
+  return pages / denom;
+}
+
 // ——— finish forecast ———
 // Rate = the book's actual pages over the trailing 14 calendar days (shorter if
 // tracking just began), zeros included. Naive on purpose.

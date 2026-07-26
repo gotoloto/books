@@ -2,6 +2,8 @@
 // books.json array order is the default rank; the saved order (ids) overrides.
 // Merge is self-healing: vanished ids drop out, new planned books append.
 
+import { currentPosition, recentPacePages } from "./derive.js";
+
 const KEY = "books:queue-order:v1";
 
 function esc(s) {
@@ -24,9 +26,38 @@ function saveOrder(order) {
   try { localStorage.setItem(KEY, JSON.stringify(order)); } catch { /* private mode */ }
 }
 
+// Queue totals + time-to-clear at the reader's recent pace. Page counts on
+// planned books are Goodreads estimates (~), refined when a book starts.
+function renderEta(planned, state) {
+  const box = document.getElementById("queue-eta");
+  if (!box) return;
+  const known = planned.filter((b) => Number.isFinite(b.totalPages));
+  const total = known.reduce((a, b) => a + b.totalPages, 0);
+  const unknown = planned.length - known.length;
+  const pace = recentPacePages(state.entries, state.today);
+  const onTheGo = state.books
+    .filter((b) => b.status === "reading" && Number.isFinite(b.totalPages))
+    .reduce((a, b) => a + (b.totalPages - currentPosition(b, state.entries)), 0);
+
+  let text = `<b>${planned.length}</b> book${planned.length === 1 ? "" : "s"} · ~<b>${total.toLocaleString()}</b> pages`;
+  if (unknown) text += ` (${unknown} uncounted)`;
+  if (pace > 0) {
+    const days = Math.ceil(total / pace);
+    const months = days / 30.44;
+    const span = days < 90 ? `${days} days` : `~${Math.round(months)} months`;
+    text += ` ≈ <b>${span}</b> at your current pace (${pace.toFixed(1)} pp/day)`;
+    if (onTheGo > 0) text += ` — queued behind the ${onTheGo.toLocaleString()} pages still on the go`;
+  } else {
+    text += ` — log some reading to get a clearance forecast`;
+  }
+  box.innerHTML = text + ".";
+}
+
 export function renderQueue(state) {
   const planned = state.books.filter((b) => b.status === "planned");
   const list = document.getElementById("queue-list");
+
+  renderEta(planned, state);
 
   if (!planned.length) {
     list.innerHTML = "";
@@ -48,7 +79,7 @@ export function renderQueue(state) {
       <li class="q-row" draggable="true" data-id="${esc(id)}">
         <span class="rank">${String(i + 1).padStart(2, "0")}</span>
         <span class="thumb"><img src="${esc(b.cover)}" alt="" loading="lazy"></span>
-        <span class="meta"><b>${esc(b.title)}</b><span>${esc(b.author)}</span></span>
+        <span class="meta"><b>${esc(b.title)}</b><span>${esc(b.author)}${Number.isFinite(b.totalPages) ? ` · ~${b.totalPages} pp` : ""}</span></span>
         <span class="grip" aria-hidden="true">::::</span>
       </li>`;
       })
