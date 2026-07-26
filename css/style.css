@@ -40,7 +40,13 @@ body {
   font-size: 17px;
   line-height: 1.55;
   -webkit-font-smoothing: antialiased;
+  /* sticky footer: pin the bottom checker strip to the viewport on short pages */
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
 }
+header, footer { flex-shrink: 0; }
 
 /* ——— chessboard strips ——— */
 .checker {
@@ -82,6 +88,8 @@ body {
 
 /* ——— layout ——— */
 main {
+  flex: 1 0 auto;
+  width: 100%;
   max-width: 1020px;
   margin: 0 auto;
   padding: 30px 20px 60px;
