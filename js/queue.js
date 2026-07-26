@@ -28,13 +28,12 @@ function saveOrder(order) {
 
 // Queue totals + time-to-clear at the reader's recent pace. Page counts on
 // planned books are Goodreads estimates (~), refined when a book starts.
-function renderEta(planned, state) {
+function renderEta(planned, state, pace) {
   const box = document.getElementById("queue-eta");
   if (!box) return;
   const known = planned.filter((b) => Number.isFinite(b.totalPages));
   const total = known.reduce((a, b) => a + b.totalPages, 0);
   const unknown = planned.length - known.length;
-  const pace = recentPacePages(state.entries, state.today);
   const onTheGo = state.books
     .filter((b) => b.status === "reading" && Number.isFinite(b.totalPages))
     .reduce((a, b) => a + (b.totalPages - currentPosition(b, state.entries)), 0);
@@ -56,8 +55,9 @@ function renderEta(planned, state) {
 export function renderQueue(state) {
   const planned = state.books.filter((b) => b.status === "planned");
   const list = document.getElementById("queue-list");
+  const pace = recentPacePages(state.entries, state.today);
 
-  renderEta(planned, state);
+  renderEta(planned, state, pace);
 
   if (!planned.length) {
     list.innerHTML = "";
@@ -79,7 +79,7 @@ export function renderQueue(state) {
       <li class="q-row" draggable="true" data-id="${esc(id)}">
         <span class="rank">${String(i + 1).padStart(2, "0")}</span>
         <span class="thumb"><img src="${esc(b.cover)}" alt="" loading="lazy"></span>
-        <span class="meta"><b>${esc(b.title)}</b><span>${esc(b.author)}${Number.isFinite(b.totalPages) ? ` · ~${b.totalPages} pp` : ""}</span></span>
+        <span class="meta"><b>${esc(b.title)}</b><span>${esc(b.author)}${Number.isFinite(b.totalPages) ? ` · ~${b.totalPages} pp` : ""}${Number.isFinite(b.totalPages) && pace > 0 ? ` · ≈ ${Math.ceil(b.totalPages / pace)} days` : ""}</span></span>
         <span class="grip" aria-hidden="true">::::</span>
       </li>`;
       })
