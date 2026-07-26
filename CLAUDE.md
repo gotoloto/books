@@ -45,6 +45,8 @@ When Travis reports reading (any phrasing like "Book X — read pages A–B"):
    - `date` = today's local date unless the user says otherwise ("yesterday I…").
    - Multiple sessions in one day = multiple entries; never merge or edit old entries
      (append-only, unless the user corrects a mistake).
+   - **Keep each entry on one line** (`{ "date": …, "book": …, "from": …, "to": … }`)
+     so every log commit is a one-line diff. Don't let a JSON formatter explode them.
 4. Validate both files parse: `python3 -c "import json; json.load(open('data/books.json')); json.load(open('data/log.json'))"`
 5. Commit + push (Travis pre-authorized auto-push for log updates):
    `git add data/ && git commit -m "log: 2666 pp. 410–455" && git push`
