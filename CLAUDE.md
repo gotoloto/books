@@ -1,0 +1,118 @@
+# books — personal reading tracker
+
+Static site for Travis's reading log. Live at **https://gotoloto.github.io/books/**
+(GitHub Pages, repo `gotoloto/books`, `main` branch, root). No build step, no
+dependencies — plain HTML/CSS/ES-modules. Day 0 of tracking is **2026-07-26**.
+
+Travis updates progress conversationally ("2666 — read pages 410–455"). Your job
+on those messages: update the JSON, commit, push. Details below — follow them
+exactly; the semantics are easy to get wrong.
+
+## The one rule people get wrong
+
+Log entries store **bookmark positions, not inclusive page counts**.
+
+```
+{ "date": "2026-07-27", "book": "2666", "from": 410, "to": 455 }
+```
+
+- pages read = `to − from` (here: 45). "Read pages 410–455" means went FROM 410 TO 455.
+- The reader's current position afterward = `to`.
+- **Continuity rule**: a new entry's `from` must equal the book's last `to`
+  (or `startPage` if the book has no entries). If the user's report doesn't line
+  up (gap or overlap), point out the mismatch and ask before appending —
+  they may have skipped front matter, re-read, or mistyped.
+
+## Daily update recipe
+
+When Travis reports reading (any phrasing like "Book X — read pages A–B"):
+
+1. Identify the book id in `data/books.json` (match by title, case-insensitive).
+2. Check continuity: last entry's `to` for that book (or `startPage`). Mismatch → ask.
+3. Append `{date, book, from, to}` to `entries` in `data/log.json`.
+   - `date` = today's local date unless the user says otherwise ("yesterday I…").
+   - Multiple sessions in one day = multiple entries; never merge or edit old entries
+     (append-only, unless the user corrects a mistake).
+4. Validate both files parse: `python3 -c "import json; json.load(open('data/books.json')); json.load(open('data/log.json'))"`
+5. Commit + push (Travis pre-authorized auto-push for log updates):
+   `git add data/ && git commit -m "log: 2666 pp. 410–455" && git push`
+6. Pages redeploys in ~30–90 s. Data is fetched with `cache:'no-cache'`, so a
+   reload shows it immediately after deploy; CSS/JS changes can lag up to 10 min (CDN).
+
+If the entry lands them on the last page (`to == totalPages`), congratulate them and
+also do the "finishing a book" steps.
+
+## Finishing a book
+
+In `data/books.json`: set `status: "finished"`, `finishDate: "YYYY-MM-DD"`.
+It moves to the Finished shelf; its series stays in the charts.
+
+## Starting a new book
+
+Collect/derive, then fill the book's entry (planned books already exist with nulls):
+
+1. `totalPages` — the physical copy's last numbered page (ask Travis).
+2. `startPage` — 0 unless starting mid-book, `startDate` — first tracked day.
+3. `wordsPerPage` — ask Travis for photos of ~5 representative pages, dropped in a
+   folder named like `<book> pages/` (anything matching `* pages/` is gitignored —
+   **page scans must never be committed; the repo is public**). OCR each photo:
+   count text lines exactly, sample several full lines for words-per-line, estimate
+   words per page; average across photos; round to an integer. Show the per-page
+   numbers so Travis can sanity-check. (2666's five pages gave 440/440/436/482/486 → 457.)
+4. `color` — next unused hex from the validated palette in `js/stats.js`
+   (`PALETTE`, in order: forest, gold, slate, rust, teal, chestnut, plum, olive).
+   Store it explicitly on the book so colors never shift as books are added.
+5. `status: "reading"`.
+6. Cover if missing or wrong edition: Goodreads autocomplete API
+   (`goodreads.com/book/auto_complete?format=json&q=…`, strip the `._SY75_`/`._SX50_`
+   suffix from `imageUrl` for full size) or Amazon by ISBN-10
+   (`images.amazon.com/images/P/<ISBN10>.01.LZZZZZZZ.jpg`). Save to
+   `covers/<id>.jpg` — **lowercase** (Pages is case-sensitive), real JPEG, ≤900px tall
+   (`sips -Z 900 -s format jpeg`). Prefer the edition Travis owns.
+
+Adding a brand-new planned book: append to `books` with `status:"planned"` and nulls,
+fetch its cover the same way. Array order of planned books = default queue rank
+(browser drag-and-drop order overrides locally via localStorage).
+
+## pages vs pages* (the whole point of the site)
+
+- **pages** (no asterisk) = the book's actual page numbers. Used in user reports,
+  log ranges, tooltips' page ranges, and each book's "N pages" fact.
+- **pages\*** = typesetting-normalized unit. `global_wpp` = mean `wordsPerPage`
+  across measured books; a book's factor = `wordsPerPage / global_wpp`;
+  `pages* = pages × factor`. Books with `wordsPerPage: null` get factor 1 and are
+  excluded from the mean.
+- pages* is **always computed at render time** in the browser (js/derive.js) from raw
+  facts. Never store a pages* number in the data files — the global average drifts
+  whenever a new book is measured, retroactively (and intentionally) rescaling history.
+- Anything displayed in pages* carries the asterisk (`pp*`). Keep that convention.
+
+## Files
+
+```
+index.html        tabs: #library #queue #stats (hash-routed, single page)
+css/style.css     palette tokens, chessboard motif, hard edges, serif stack
+js/derive.js      pure math: dates (UTC-safe), wpp, aggregation — has no DOM
+js/main.js        fetch (no-cache), router, error banner
+js/library.js     reading cards + finished shelf
+js/queue.js       drag-drop ranking, localStorage `books:queue-order:v1`
+js/charts.js      hand-rolled SVG primitives + tooltip
+js/stats.js       records strip, cumulative chart, daily scatter, log table, PALETTE
+data/books.json   one entry per book (see fields above)
+data/log.json     append-only reading log
+covers/*.jpg      local cover images, lowercase filenames
+```
+
+## Conventions & gotchas
+
+- Dates are `YYYY-MM-DD` strings; in JS never `new Date("YYYY-MM-DD")` (UTC
+  off-by-one) — use helpers in `js/derive.js`.
+- All repo filenames lowercase; all URLs relative (site lives under `/books/`).
+- 2666 baseline: tracking started at p. 410 of 893 on Day 0 — pages 1–410
+  intentionally never appear in stats; the library card still shows true position.
+- Local preview: `python3 -m http.server 8123` (or the `books-site` launch config) —
+  `fetch()` and ES modules don't work over `file://`.
+- Cumulative chart layering: series sort by final value descending so big books
+  paint behind small ones. Colors come from `book.color`, falling back to a stable
+  slot; the palette order is CVD-validated — don't reorder it.
+- Keep this file updated when workflows change.

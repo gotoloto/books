@@ -119,7 +119,7 @@ function frame(container, height, winStart, winEnd, maxVal, unitLabel) {
     svg.appendChild(lbl);
   }
 
-  const unit = el("text", { x: M.left - 8, y: M.top - 4, "text-anchor": "end", "font-size": 12.5, "font-style": "italic" });
+  const unit = el("text", { x: M.left + 8, y: M.top + 14, "text-anchor": "start", "font-size": 12.5, "font-style": "italic" });
   unit.textContent = unitLabel;
   svg.appendChild(unit);
 
@@ -142,7 +142,11 @@ export function renderCumulative(container, series, opts) {
   const drawEnd = winEnd < today ? winEnd : today; // never draw into the future
 
   for (const s of series) {
-    const pts = [{ date: winStart, v: 0 }, ...s.points];
+    // Zero-anchor the day before the first reading day (clamped to the window)
+    // so a book that enters mid-window stays flat at 0 until it actually starts.
+    const dayBefore = addDays(s.points[0].date, -1);
+    const anchor = dayBefore > winStart ? dayBefore : winStart;
+    const pts = [{ date: anchor, v: 0 }, ...s.points];
     const last = pts[pts.length - 1];
     if (last.date < drawEnd) pts.push({ date: drawEnd, v: last.v }); // flat to "now"
 

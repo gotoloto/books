@@ -1,6 +1,6 @@
 import { currentPosition, fmtLong, starFactor } from "./derive.js";
 
-const SQUARES = 36;
+const SQUARES = 30;
 
 function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
