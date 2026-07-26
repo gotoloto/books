@@ -205,12 +205,21 @@ export function renderDaily(container, points, opts) {
   const f = frame(container, 280, winStart, winEnd, maxVal, unitLabel);
 
   const meta = [];
+  const stems = el("g");
+  const dots = el("g");
+  f.svg.appendChild(stems);
+  f.svg.appendChild(dots);
+  const y0 = f.y(0).toFixed(1);
   for (const p of points) {
     const cx = f.x(p.date).toFixed(1);
     const cy = f.y(p.v).toFixed(1);
-    f.svg.appendChild(el("circle", { cx, cy, r: 4.5, fill: "#3A7A33", "fill-opacity": 0.78, stroke: "#F0EAD6", "stroke-width": 1 }));
+    stems.appendChild(el("line", {
+      x1: cx, x2: cx, y1: y0, y2: cy,
+      stroke: "#3A7A33", "stroke-width": 1.5, "stroke-opacity": 0.4,
+    }));
+    dots.appendChild(el("circle", { cx, cy, r: 4.5, fill: "#3A7A33", "fill-opacity": 0.78, stroke: "#F0EAD6", "stroke-width": 1 }));
     const hit = el("circle", { cx, cy, r: 12, fill: "transparent", "data-i": meta.length });
-    f.svg.appendChild(hit);
+    dots.appendChild(hit);
     meta.push(p);
   }
 
