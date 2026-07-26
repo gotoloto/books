@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>books</title>
+<link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><rect width="16" height="16" fill="%23F0EAD6"/><rect width="8" height="8" fill="%232E4B2E"/><rect x="8" y="8" width="8" height="8" fill="%23A68A64"/></svg>'>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<header>
+  <div class="checker" aria-hidden="true"></div>
+  <nav class="tabs" role="tablist" aria-label="Sections">
+    <a href="#library" role="tab" id="tab-library" aria-controls="view-library" aria-selected="true">Library</a>
+    <a href="#queue"   role="tab" id="tab-queue"   aria-controls="view-queue"   aria-selected="false">Queue</a>
+    <a href="#stats"   role="tab" id="tab-stats"   aria-controls="view-stats"   aria-selected="false">Stats</a>
+  </nav>
+</header>
+
+<main>
+  <div id="banner" hidden></div>
+
+  <section id="view-library" class="view" role="tabpanel" aria-labelledby="tab-library">
+    <h2>Currently reading</h2>
+    <div id="reading-cards"></div>
+    <h2>Finished</h2>
+    <div id="finished-shelf"></div>
+  </section>
+
+  <section id="view-queue" class="view" role="tabpanel" aria-labelledby="tab-queue" hidden>
+    <h2>Planned reads</h2>
+    <p class="queue-hint">Drag to reorder. The ranking is stored in this browser only.</p>
+    <ol id="queue-list"></ol>
+  </section>
+
+  <section id="view-stats" class="view" role="tabpanel" aria-labelledby="tab-stats" hidden>
+    <div id="records" class="records"></div>
+
+    <h2>Cumulative, by book</h2>
+    <div id="controls" class="controls"></div>
+    <div id="legend-a" class="legend"></div>
+    <div id="chart-a" class="chart-block chart-wrap"></div>
+
+    <h2>Daily</h2>
+    <div id="chart-b" class="chart-block chart-wrap"></div>
+
+    <p id="norm-note" class="footnote"></p>
+
+    <details class="logbox">
+      <summary>Reading log</summary>
+      <div id="log-table"></div>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <div class="checker thin" aria-hidden="true"></div>
+</footer>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
