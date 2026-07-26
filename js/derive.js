@@ -41,6 +41,17 @@ export function fmtMonthYear(iso) {
   return `${MONTHS[m - 1]} ’${String(y).slice(2)}`;
 }
 
+export function fmtMonth(iso) {
+  const m = Number(iso.split("-")[1]);
+  return MONTHS[m - 1];
+}
+
+// Monday of the ISO week containing iso (weeks run Mon–Sun).
+export function mondayOf(iso) {
+  const dow = new Date(toUTCms(iso)).getUTCDay(); // 0 = Sun
+  return addDays(iso, -((dow + 6) % 7));
+}
+
 export function fmtLong(iso) {
   const [y, m, d] = iso.split("-").map(Number);
   return `${MONTHS[m - 1]} ${d}, ${y}`;
@@ -120,24 +131,53 @@ export function dailyPoints(byBook, winStart, winEnd) {
   return out;
 }
 
-// ——— records ———
+// ——— per-day rollup (day is the display granularity everywhere) ———
 
-export function records(byBook, books, gWpp, today) {
-  const perDay = new Map(); // date -> pages* total
+// Map<date, {star, titles[]}> — total pages* and the books touched that day.
+export function perDayTotals(byBook, books, gWpp) {
+  const map = new Map();
   for (const [bookId, days] of byBook) {
     const book = books.find((b) => b.id === bookId);
     const f = book ? starFactor(book, gWpp) : 1;
     for (const [date, info] of days) {
-      perDay.set(date, (perDay.get(date) || 0) + info.pages * f);
+      if (!map.has(date)) map.set(date, { star: 0, titles: [] });
+      const d = map.get(date);
+      d.star += info.pages * f;
+      d.titles.push(book && book.title ? book.title : bookId);
     }
   }
+  return map;
+}
+
+// ——— records ———
+
+export function records(byBook, books, gWpp, today) {
+  const perDay = perDayTotals(byBook, books, gWpp);
   let bestDay = null;
   let total = 0;
+  const weeks = new Map();   // ISO-Monday -> pages*
+  const months = new Map();  // "YYYY-MM"  -> pages*
   for (const [date, v] of perDay) {
-    total += v;
-    if (!bestDay || v > bestDay.value) bestDay = { date, value: v };
+    total += v.star;
+    if (!bestDay || v.star > bestDay.value) bestDay = { date, value: v.star };
+    const wk = mondayOf(date);
+    weeks.set(wk, (weeks.get(wk) || 0) + v.star);
+    const ym = date.slice(0, 7);
+    months.set(ym, (months.get(ym) || 0) + v.star);
   }
-  // Streak: consecutive days with reading, counting back from today
+  // Sorted iteration → deterministic tie-breaks (earliest wins).
+  let bestWeek = null;
+  for (const start of [...weeks.keys()].sort()) {
+    const value = weeks.get(start);
+    if (!bestWeek || value > bestWeek.value) bestWeek = { start, value };
+  }
+  let bestMonth = null;
+  for (const ym of [...months.keys()].sort()) {
+    const value = months.get(ym);
+    if (!bestMonth || value > bestMonth.value) bestMonth = { ym, value };
+  }
+
+  // Current streak: consecutive days counting back from today
   // (today itself may still be unlogged — start from yesterday in that case).
   let streak = 0;
   let cursor = perDay.has(today) ? today : addDays(today, -1);
@@ -145,5 +185,34 @@ export function records(byBook, books, gWpp, today) {
     streak += 1;
     cursor = addDays(cursor, -1);
   }
-  return { bestDay, streak, total, daysRead: perDay.size };
+  // Longest streak ever, with its span for the sublabel.
+  const dates = [...perDay.keys()].sort();
+  let longestStreak = null;
+  let run = 0;
+  for (let i = 0; i < dates.length; i++) {
+    run = i > 0 && diffDays(dates[i - 1], dates[i]) === 1 ? run + 1 : 1;
+    if (!longestStreak || run > longestStreak.len) {
+      longestStreak = { len: run, start: dates[i - run + 1], end: dates[i] };
+    }
+  }
+  return { bestDay, bestWeek, bestMonth, streak, longestStreak, total, daysRead: perDay.size };
+}
+
+// ——— finish forecast ———
+// Rate = the book's actual pages over the trailing 14 calendar days (shorter if
+// tracking just began), zeros included. Naive on purpose.
+export function forecast(book, entries, today) {
+  if (!Number.isFinite(book.totalPages) || !book.startDate) return { rate: 0, date: null };
+  const denom = Math.min(14, Math.max(1, diffDays(book.startDate, today) + 1));
+  const cutoff = addDays(today, -(denom - 1));
+  let pages = 0;
+  for (const e of entries) {
+    if (e.book === book.id && e.date >= cutoff && e.date <= today) pages += e.to - e.from;
+  }
+  const rate = pages / denom;
+  if (rate <= 0) return { rate: 0, date: null, denom };
+  const remaining = book.totalPages - currentPosition(book, entries);
+  if (remaining <= 0) return { rate, date: today, done: true, denom };
+  const daysLeft = Math.ceil(remaining / rate);
+  return { rate, date: addDays(today, daysLeft), daysLeft, denom };
 }

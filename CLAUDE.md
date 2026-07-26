@@ -23,9 +23,21 @@ Log entries store **bookmark positions, not inclusive page counts**.
   up (gap or overlap), point out the mismatch and ask before appending —
   they may have skipped front matter, re-read, or mistyped.
 
+## Day granularity (display convention)
+
+Storage is per-session and append-only — if Travis reports twice in a day, that's two
+entries. But **every user-visible surface merges to (book, day)**: one scatter dot, one
+tooltip range (first `from` → last `to`), one reading-log table row, day-based records
+only. Never surface individual sessions in the UI. (Merged ranges lean on the
+continuity rule; a deliberate re-read day would show a range narrower than its page
+count — acceptable.)
+
 ## Daily update recipe
 
 When Travis reports reading (any phrasing like "Book X — read pages A–B"):
+
+0. `git pull --rebase` first. Travis also logs from his phone via claude.ai/code
+   cloud sessions, so the local clone routinely lags origin.
 
 1. Identify the book id in `data/books.json` (match by title, case-insensitive).
 2. Check continuity: last entry's `to` for that book (or `startPage`). Mismatch → ask.
@@ -42,10 +54,20 @@ When Travis reports reading (any phrasing like "Book X — read pages A–B"):
 If the entry lands them on the last page (`to == totalPages`), congratulate them and
 also do the "finishing a book" steps.
 
+### From the phone
+
+Travis logs from his iPhone with **Claude Code sessions at claude.ai/code (or the
+Claude mobile app)** pointed at the `gotoloto/books` GitHub repo. Those sessions read
+this file and follow the exact same recipe — nothing else is configured, and nothing
+else should be built (he explicitly declined GitHub Actions / Shortcuts automation).
+The only consequence for local sessions is step 0 above: always pull first.
+
 ## Finishing a book
 
 In `data/books.json`: set `status: "finished"`, `finishDate: "YYYY-MM-DD"`.
-It moves to the Finished shelf; its series stays in the charts.
+It moves to the Finished shelf; its series stays in the charts. `finishDate` also
+drives the finish pennant on the cumulative chart and the book's spine on the
+spine shelf, and `color` paints both — so a finished book must have both fields.
 
 ## Starting a new book
 
@@ -115,4 +137,8 @@ covers/*.jpg      local cover images, lowercase filenames
 - Cumulative chart layering: series sort by final value descending so big books
   paint behind small ones. Colors come from `book.color`, falling back to a stable
   slot; the palette order is CVD-validated — don't reorder it.
+- Stats definitions: week = Mon–Sun (records + heatmap columns); month = calendar
+  month; heatmap bins (1/15/30/50 pp*) are display-only and tunable in js/charts.js;
+  forecast = the book's raw pages over the trailing 14 calendar days (shorter
+  denominator until day 14), zeros included — naive on purpose.
 - Keep this file updated when workflows change.

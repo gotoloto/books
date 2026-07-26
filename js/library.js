@@ -1,4 +1,5 @@
-import { currentPosition, fmtLong, starFactor } from "./derive.js";
+import { currentPosition, fmtLong, forecast, starFactor } from "./derive.js";
+import { bookColor } from "./stats.js";
 
 const SQUARES = 30;
 
@@ -22,6 +23,17 @@ function squareBar(pct) {
   return html + "</div>";
 }
 
+function forecastLine(book, state) {
+  const fc = forecast(book, state.entries, state.today);
+  if (fc.done) return `<p class="forecast">Final page logged — shelve it.</p>`;
+  if (!fc.rate) return `<p class="forecast">Forecast paused — no reading in the last 14 days.</p>`;
+  if (fc.daysLeft > 730) {
+    return `<p class="forecast">Pace ${fc.rate.toFixed(1)} pages/day — finish is years out at this pace.</p>`;
+  }
+  const early = fc.denom < 14 ? ` — early estimate (${fc.denom}-day sample)` : "";
+  return `<p class="forecast">Pace <b>${fc.rate.toFixed(1)}</b> pages/day · finish ≈ <b>${fmtLong(fc.date)}</b> (${fc.daysLeft} ${fc.daysLeft === 1 ? "day" : "days"})${early}</p>`;
+}
+
 function readingCard(book, state) {
   const pos = currentPosition(book, state.entries);
   const pct = (pos / book.totalPages) * 100;
@@ -37,6 +49,7 @@ function readingCard(book, state) {
       <p class="book-author">${esc(book.author)}</p>
       <p class="pos-line">On page <strong>${pos}</strong> of ${book.totalPages} · ${pct.toFixed(1)}%</p>
       ${squareBar(pct)}
+      ${forecastLine(book, state)}
       <div class="fact-row">
         <span><b>${book.totalPages}</b> pages</span>
         <span><b>${star ?? "—"}</b> pages<span title="normalized pages">*</span></span>
@@ -63,6 +76,35 @@ function shelfSlot(book, state) {
   </div>`;
 }
 
+// ——— spine shelf: finished books as spines, width ∝ pages* ———
+
+function luma(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  return (((n >> 16) & 255) * 299 + (((n >> 8) & 255) * 587) + (n & 255) * 114) / 1000;
+}
+
+function hashCode(s) {
+  let h = 0;
+  for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0;
+  return Math.abs(h);
+}
+
+function spineShelf(finished, state) {
+  const spines = [...finished]
+    .sort((a, b) => ((a.finishDate || "") < (b.finishDate || "") ? -1 : 1)) // shelf fills left → right
+    .map((b) => {
+      const star = pagesStar(b, state.gWpp) ?? b.totalPages ?? 320;
+      const w = Math.max(24, Math.min(68, Math.round(18 + 0.05 * star)));
+      const h = 150 + (hashCode(b.id) % 4) * 10;
+      const color = bookColor(b, state);
+      const ink = luma(color) > 125 ? "var(--ink)" : "var(--eggshell)";
+      const tip = `${b.title} — ${b.author}${b.finishDate ? ", finished " + fmtLong(b.finishDate) : ""}`;
+      return `<div class="spine" style="width:${w}px;height:${h}px;background:${color};color:${ink}" title="${esc(tip)}"><span class="t">${esc(b.title)}</span></div>`;
+    })
+    .join("");
+  return `<div class="spine-shelf"><div class="spine-inner"><div class="spine-row">${spines}</div><div class="shelf-board"></div></div></div>`;
+}
+
 export function renderLibrary(state) {
   const reading = state.books.filter((b) => b.status === "reading");
   const finished = state.books
@@ -74,6 +116,6 @@ export function renderLibrary(state) {
     : '<p class="empty-note">Nothing on the go. Pick something from the queue.</p>';
 
   document.getElementById("finished-shelf").innerHTML = finished.length
-    ? `<div class="shelf">${finished.map((b) => shelfSlot(b, state)).join("")}</div>`
+    ? spineShelf(finished, state) + `<div class="shelf">${finished.map((b) => shelfSlot(b, state)).join("")}</div>`
     : '<p class="empty-note">Nothing finished since Day 0 (July 26, 2026). The shelf awaits.</p>';
 }

@@ -1,8 +1,8 @@
 import {
   addDays, cumulativeSeries, dailyPoints, diffDays,
-  fmtLong, fmtShort, records, starFactor,
+  fmtLong, fmtMonthYear, fmtShort, perDayTotals, records, starFactor,
 } from "./derive.js";
-import { renderCumulative, renderDaily } from "./charts.js";
+import { renderCumulative, renderDaily, renderHeatmap } from "./charts.js";
 
 // Validated series palette — fixed assignment order, never shuffled.
 const PALETTE = ["#3A7A33", "#C99414", "#4C74B8", "#C0552D", "#1B9488", "#A26320", "#A0538F", "#8A941F"];
@@ -11,13 +11,17 @@ const DAY0 = "2026-07-26";
 
 const ui = { preset: "1m", unit: "star", customStart: null, customEnd: null, built: false };
 
+// Window-independent per-day pp* rollup; refreshed on each stats activation.
+let perDay = new Map();
+
 function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
 // Color follows the book, never its rank: explicit book.color wins; otherwise
 // a stable slot by order of first tracking (startDate), which never reorders.
-function bookColor(book, state) {
+// Exported for the spine shelf (library.js).
+export function bookColor(book, state) {
   if (book.color) return book.color;
   const tracked = state.books
     .filter((b) => b.status !== "planned")
@@ -121,13 +125,28 @@ function syncControls() {
 
 function renderRecords(state) {
   const r = records(state.daily, state.books, state.gWpp, state.today);
+  const days = (n) => `${n} <small>${n === 1 ? "day" : "days"}</small>`;
   const tiles = [
     {
       val: r.bestDay ? `${Math.round(r.bestDay.value)} <small>pp*</small>` : "—",
       lbl: r.bestDay ? `best day · ${fmtShort(r.bestDay.date)}` : "best day",
     },
     {
-      val: `${r.streak} <small>${r.streak === 1 ? "day" : "days"}</small>`,
+      val: r.bestWeek ? `${Math.round(r.bestWeek.value)} <small>pp*</small>` : "—",
+      lbl: r.bestWeek ? `best week · wk of ${fmtShort(r.bestWeek.start)}` : "best week",
+    },
+    {
+      val: r.bestMonth ? `${Math.round(r.bestMonth.value)} <small>pp*</small>` : "—",
+      lbl: r.bestMonth ? `best month · ${fmtMonthYear(r.bestMonth.ym + "-01")}` : "best month",
+    },
+    {
+      val: r.longestStreak ? days(r.longestStreak.len) : "—",
+      lbl: r.longestStreak
+        ? `longest streak · ${fmtShort(r.longestStreak.start)}–${fmtShort(r.longestStreak.end)}`
+        : "longest streak",
+    },
+    {
+      val: days(r.streak),
       lbl: "current streak",
     },
     {
@@ -155,7 +174,14 @@ function renderCharts(state) {
     if (!pts.length) continue; // no reading in window → omitted entirely
     const f = useStar ? starFactor(b, state.gWpp) : 1;
     const points = pts.map((p) => ({ date: p.date, v: p.cum * f }));
-    series.push({ title: b.title, color: bookColor(b, state), points, final: points[points.length - 1].v });
+    series.push({
+      title: b.title,
+      color: bookColor(b, state),
+      points,
+      final: points[points.length - 1].v,
+      finished: b.status === "finished",
+      finishDate: b.finishDate || null,
+    });
   }
   // Big books painted first (behind); small books stay visible on top.
   series.sort((a, b) => b.final - a.final);
@@ -177,8 +203,20 @@ function renderCharts(state) {
       v: p.pages * (b ? starFactor(b, state.gWpp) : 1),
     };
   });
+  // 7-day rolling mean of total pp*/day (zeros count; may look back before the
+  // window via the full perDay map). Chart B is always pp* — toggle never applies.
+  const paceEnd = we < state.today ? we : state.today;
+  const pace = [];
+  for (let d = ws; d <= paceEnd; d = addDays(d, 1)) {
+    let sum = 0;
+    for (let k = 0; k < 7; k++) {
+      const v = perDay.get(addDays(d, -k));
+      if (v) sum += v.star;
+    }
+    pace.push({ date: d, v: sum / 7 });
+  }
   renderDaily(document.getElementById("chart-b"), pts, {
-    winStart: ws, winEnd: we, unitLabel: "pages*",
+    winStart: ws, winEnd: we, unitLabel: "pages*", pace,
   });
 }
 
@@ -201,31 +239,43 @@ function renderLogTable(state) {
     box.innerHTML = '<p class="empty-note">No entries yet.</p>';
     return;
   }
-  const rows = [...state.entries]
-    .map((e, i) => ({ ...e, i }))
-    .sort((a, b) => (a.date === b.date ? b.i - a.i : a.date < b.date ? 1 : -1))
-    .map((e) => {
-      const b = state.byId.get(e.book);
-      const f = b ? starFactor(b, state.gWpp) : 1;
-      const pages = e.to - e.from;
-      return `<tr>
-        <td>${fmtLong(e.date)}</td>
-        <td>${esc(b ? b.title : e.book)}</td>
-        <td class="num">${e.from} → ${e.to}</td>
-        <td class="num">${pages}</td>
-        <td class="num">${Math.round(pages * f)}</td>
-      </tr>`;
-    })
+  // Day granularity: one row per (book, day); same-day sessions merge into one range.
+  const rows = [];
+  for (const [bookId, days] of state.daily) {
+    const b = state.byId.get(bookId);
+    const f = b ? starFactor(b, state.gWpp) : 1;
+    for (const [date, info] of days) {
+      rows.push({
+        date,
+        title: b ? b.title : bookId,
+        from: info.ranges[0][0],
+        to: info.ranges[info.ranges.length - 1][1],
+        pages: info.pages,
+        star: Math.round(info.pages * f),
+      });
+    }
+  }
+  rows.sort((a, b) => (a.date === b.date ? (a.title < b.title ? -1 : 1) : a.date < b.date ? 1 : -1));
+  const html = rows
+    .map((r) => `<tr>
+        <td>${fmtLong(r.date)}</td>
+        <td>${esc(r.title)}</td>
+        <td class="num">${r.from} → ${r.to}</td>
+        <td class="num">${r.pages}</td>
+        <td class="num">${r.star}</td>
+      </tr>`)
     .join("");
   box.innerHTML = `<table class="log">
     <thead><tr><th>Date</th><th>Book</th><th class="num">Range</th><th class="num">pp</th><th class="num">pp*</th></tr></thead>
-    <tbody>${rows}</tbody>
+    <tbody>${html}</tbody>
   </table>`;
 }
 
 export function renderStats(state) {
+  perDay = perDayTotals(state.daily, state.books, state.gWpp);
   buildControls(state);
   renderRecords(state);
+  renderHeatmap(document.getElementById("heatmap"), perDay, { today: state.today });
   renderCharts(state);
   renderNormNote(state);
   renderLogTable(state);

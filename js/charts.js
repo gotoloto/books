@@ -1,9 +1,12 @@
 // Hand-rolled SVG chart primitives. Fixed-pixel coordinates (1 svg unit = 1 css px),
 // full re-render on every change — the data is tiny.
 
-import { addDays, diffDays, fmtShort, fmtMonthYear, fmtLong, fromUTCms } from "./derive.js";
+import { addDays, diffDays, fmtShort, fmtMonth, fmtMonthYear, fmtLong, fromUTCms, mondayOf } from "./derive.js";
 
 const NS = "http://www.w3.org/2000/svg";
+
+const esc = (s) =>
+  String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 
 export function el(name, attrs = {}) {
   const node = document.createElementNS(NS, name);
@@ -159,6 +162,29 @@ export function renderCumulative(container, series, opts) {
     f.svg.appendChild(g);
   }
 
+  // Finish pennants — drawn after every area so no series can paint over a flag.
+  // Checkered 2×2 flag on a pole at the summit; clamped inside the top margin.
+  for (const s of series) {
+    if (!(s.finished && s.finishDate && s.finishDate >= winStart && s.finishDate <= winEnd)) continue;
+    const last = s.points[s.points.length - 1];
+    if (!last || last.v <= 0) continue;
+    const px = f.x(last.date);
+    const py = f.y(last.v);
+    const fy = Math.max(2, py - 26);
+    const flag = el("g", { "shape-rendering": "crispEdges" });
+    flag.appendChild(el("line", { x1: px.toFixed(1), x2: px.toFixed(1), y1: py.toFixed(1), y2: (fy + 10).toFixed(1), stroke: "#1E2A1E", "stroke-width": 1.5 }));
+    const qx = px.toFixed(1);
+    flag.appendChild(el("rect", { x: qx, y: fy, width: 5, height: 5, fill: s.color }));
+    flag.appendChild(el("rect", { x: (px + 5).toFixed(1), y: fy + 5, width: 5, height: 5, fill: s.color }));
+    flag.appendChild(el("rect", { x: (px + 5).toFixed(1), y: fy, width: 5, height: 5, fill: "#F0EAD6" }));
+    flag.appendChild(el("rect", { x: qx, y: fy + 5, width: 5, height: 5, fill: "#F0EAD6" }));
+    flag.appendChild(el("rect", { x: qx, y: fy, width: 10, height: 10, fill: "none", stroke: "#1E2A1E", "stroke-width": 1 }));
+    const t = el("title");
+    t.textContent = `${s.title} — finished ${fmtLong(s.finishDate)}`;
+    flag.appendChild(t);
+    f.svg.appendChild(flag);
+  }
+
   // hover: crosshair snapped to the nearest date carrying any data point
   const hoverDates = [...new Set(series.flatMap((s) => s.points.map((p) => p.date)))].sort();
   const cross = el("line", { y1: M.top, y2: f.height - M.bottom, stroke: "#4A523F", "stroke-width": 1, "stroke-dasharray": "3,3", visibility: "hidden" });
@@ -181,11 +207,11 @@ export function renderCumulative(container, series, opts) {
       .map((s) => {
         let v = 0;
         for (const p of s.points) { if (p.date <= best) v = p.v; else break; }
-        return { title: s.title, color: s.color, v };
+        return { title: s.title, color: s.color, v, finishedHere: s.finishDate === best };
       })
       .filter((r) => r.v > 0)
       .sort((a, b) => b.v - a.v)
-      .map((r) => `<span style="color:${r.color}">■</span> ${r.title} — <b>${Math.round(r.v)}</b>`)
+      .map((r) => `<span style="color:${r.color}">■</span> ${esc(r.title)} — <b>${Math.round(r.v)}</b>${r.finishedHere ? "&nbsp;· finished" : ""}`)
       .join("<br>");
     tooltipShow(container, `<span class="tt-date">${fmtLong(best)}</span>${rows || "—"}`, e.clientX, e.clientY);
   });
@@ -193,22 +219,38 @@ export function renderCumulative(container, series, opts) {
 }
 
 // ——— Chart B: daily scatter ———
-// points: [{date, title, ranges, v}] — v in pages*; tooltip shows real page ranges.
+// points: [{date, title, ranges, v}] — v in pages*; tooltip shows the day's real
+// page range (sessions merge: first from → last to). opts.pace = [{date, v}] draws
+// the 7-day rolling mean as a dashed line.
 
 export function renderDaily(container, points, opts) {
-  const { winStart, winEnd, unitLabel } = opts;
+  const { winStart, winEnd, unitLabel, pace = [] } = opts;
   if (!points.length) {
     container.innerHTML = `<div class="chart-empty">No reading logged in this window.</div>`;
     return;
   }
-  const maxVal = Math.max(...points.map((p) => p.v));
+  const maxVal = Math.max(...points.map((p) => p.v), ...pace.map((p) => p.v));
   const f = frame(container, 280, winStart, winEnd, maxVal, unitLabel);
 
   const meta = [];
   const stems = el("g");
+  const paceG = el("g");
   const dots = el("g");
   f.svg.appendChild(stems);
+  f.svg.appendChild(paceG);
   f.svg.appendChild(dots);
+
+  if (pace.length > 1) {
+    const d = pace.map((p, i) => `${i ? "L" : "M"}${f.x(p.date).toFixed(1)},${f.y(p.v).toFixed(1)}`).join("");
+    paceG.appendChild(el("path", {
+      d, fill: "none", stroke: "#4A523F", "stroke-width": 1.5, "stroke-dasharray": "5,4",
+      "pointer-events": "none",
+    }));
+    const cap = document.createElement("p");
+    cap.className = "footnote";
+    cap.textContent = "– – 7-day rolling pace (pp*/day)";
+    container.appendChild(cap);
+  }
   const y0 = f.y(0).toFixed(1);
   for (const p of points) {
     const cx = f.x(p.date).toFixed(1);
@@ -224,10 +266,11 @@ export function renderDaily(container, points, opts) {
   }
 
   const showPoint = (p, e) => {
-    const ranges = p.ranges.map(([a, b]) => `pp.&nbsp;${a}–${b}`).join(", ");
+    // Day granularity: sessions merge into one contiguous range (continuity rule).
+    const range = `pp.&nbsp;${p.ranges[0][0]}–${p.ranges[p.ranges.length - 1][1]}`;
     tooltipShow(
       container,
-      `<span class="tt-date">${fmtLong(p.date)}</span><b>${p.title}</b><br>${ranges}<br>${Math.round(p.v)} ${unitLabel}`,
+      `<span class="tt-date">${fmtLong(p.date)}</span><b>${esc(p.title)}</b><br>${range}<br>${Math.round(p.v)} ${unitLabel}`,
       e.clientX, e.clientY
     );
   };
@@ -239,4 +282,98 @@ export function renderDaily(container, points, opts) {
   f.svg.addEventListener("mousemove", onPointer);
   f.svg.addEventListener("click", onPointer); // tap-to-show for touch
   f.svg.addEventListener("mouseleave", tooltipHide);
+}
+
+// ——— Heatmap: trailing-year calendar, one cell per day ———
+// perDay: Map<date, {star, titles[]}> (pages* totals). Chessboard of the reading year.
+
+// Ramp anchored on brand tokens (eggshell-2 → --s1 → forest-deep), monotonic lightness.
+const HEAT_BINS = ["#E4DCC3", "#B9C9A0", "#7FA860", "#3A7A33", "#22381F"];
+const HEAT_LABELS = ["0", "1–14", "15–29", "30–49", "50+"];
+const heatBin = (v) => (v <= 0 ? 0 : v < 15 ? 1 : v < 30 ? 2 : v < 50 ? 3 : 4);
+
+export function renderHeatmap(container, perDay, opts) {
+  const { today } = opts;
+  container.innerHTML = "";
+  const CELL = 13, PITCH = 16, LEFT = 34, TOP = 18;
+  const start = mondayOf(addDays(today, -364)); // Monday on/before one year ago
+  const weeks = Math.floor(diffDays(start, today) / 7) + 1;
+  const width = LEFT + weeks * PITCH - 3 + 2;
+  const height = TOP + 7 * PITCH - 3 + 2;
+
+  const scroll = document.createElement("div");
+  scroll.className = "heat-scroll";
+  container.appendChild(scroll);
+  const svg = el("svg", { width, height, viewBox: `0 0 ${width} ${height}`, role: "img" });
+  scroll.appendChild(svg);
+
+  // Month labels: every month change; drop the col-0 label if the next one crowds it.
+  const labelCols = [];
+  let prevMonth = "";
+  for (let w = 0; w < weeks; w++) {
+    const ym = addDays(start, w * 7).slice(0, 7);
+    if (ym !== prevMonth) {
+      labelCols.push(w);
+      prevMonth = ym;
+    }
+  }
+  if (labelCols.length > 1 && labelCols[1] - labelCols[0] < 3) labelCols.shift();
+  for (const w of labelCols) {
+    const t = el("text", { x: LEFT + w * PITCH, y: 11, "font-size": 11 });
+    t.textContent = fmtMonth(addDays(start, w * 7));
+    svg.appendChild(t);
+  }
+
+  const meta = [];
+  for (let w = 0; w < weeks; w++) {
+    const colMonday = addDays(start, w * 7);
+    for (let r = 0; r < 7; r++) {
+      const d = addDays(colMonday, r);
+      if (d > today) break;
+      const info = perDay.get(d);
+      const star = info ? info.star : 0;
+      const bin = heatBin(star);
+      const rect = el("rect", {
+        x: LEFT + w * PITCH, y: TOP + r * PITCH, width: CELL, height: CELL, fill: HEAT_BINS[bin],
+      });
+      if (bin === 0) {
+        rect.setAttribute("stroke", "#C7B58F");
+        rect.setAttribute("stroke-width", 1);
+      } else {
+        rect.setAttribute("data-i", meta.length);
+        meta.push({ date: d, star, titles: info.titles });
+      }
+      svg.appendChild(rect);
+    }
+  }
+  for (const [row, lbl] of [[0, "Mon"], [2, "Wed"], [4, "Fri"]]) {
+    const t = el("text", { x: LEFT - 6, y: TOP + row * PITCH + 10, "text-anchor": "end", "font-size": 11 });
+    t.textContent = lbl;
+    svg.appendChild(t);
+  }
+
+  const show = (e) => {
+    const hit = e.target.closest("[data-i]");
+    if (!hit) { tooltipHide(); return; }
+    const m = meta[Number(hit.getAttribute("data-i"))];
+    tooltipShow(
+      container,
+      `<span class="tt-date">${fmtLong(m.date)}</span><b>${Math.round(m.star)} pp*</b> · ${esc(m.titles.join(", "))}`,
+      e.clientX, e.clientY
+    );
+  };
+  svg.addEventListener("mousemove", show);
+  svg.addEventListener("click", show);
+  svg.addEventListener("mouseleave", tooltipHide);
+
+  const legend = document.createElement("div");
+  legend.className = "heat-legend";
+  legend.innerHTML =
+    HEAT_BINS.map((c, i) =>
+      `<span class="cell" style="background:${c}${i === 0 ? ";border:1px solid #C7B58F" : ""}"></span>${HEAT_LABELS[i]}`
+    ).join(" ") + " pp*";
+  container.appendChild(legend);
+
+  // Open scrolled to today (the right edge) on narrow screens.
+  scroll.scrollLeft = scroll.scrollWidth;
 }
