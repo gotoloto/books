@@ -355,6 +355,9 @@ em.aside { color: var(--ink-soft); font-size: 15px; }
 .spine-row { display: flex; align-items: flex-end; gap: 6px; padding: 0 16px; }
 .spine {
   border: 2px solid var(--ink);
+  /* the shelf board's top edge is the shared baseline — no bottom border,
+     or the strokes double where book meets shelf */
+  border-bottom: none;
   display: flex;
   align-items: center;
   justify-content: center;
