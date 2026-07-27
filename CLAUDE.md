@@ -189,4 +189,8 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
   month; heatmap bins (1/15/30/50 pp*) are display-only and tunable in js/charts.js;
   forecast = the book's raw pages over the trailing 14 calendar days (shorter
   denominator until day 14), zeros included — naive on purpose.
+- **Unstarted-today rule** (`effectiveToday` in js/derive.js): a day with no logged
+  pages joins rate denominators (forecast, queue ETA, rolling pace) only once pages
+  are logged on it or the calendar moves past it. A quiet morning must not halve
+  the pace; a truly skipped day still counts as zero afterward.
 - Keep this file updated when workflows change.

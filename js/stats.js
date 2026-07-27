@@ -1,5 +1,5 @@
 import {
-  addDays, cumulativeSeries, dailyPoints, diffDays,
+  addDays, cumulativeSeries, dailyPoints, diffDays, effectiveToday,
   fmtLong, fmtMonthYear, fmtShort, perDayTotals, records, starFactor,
 } from "./derive.js";
 import { renderCumulative, renderDaily, renderHeatmap } from "./charts.js";
@@ -241,7 +241,9 @@ function renderCharts(state) {
   });
   // 7-day rolling mean of total pp*/day (zeros count; may look back before the
   // window via the full perDay map). Chart B is always pp* — toggle never applies.
-  const paceEnd = we < state.today ? we : state.today;
+  // An unstarted today stays out of the line (effectiveToday rule).
+  const effEnd = effectiveToday(state.entries, state.today);
+  const paceEnd = we < effEnd ? we : effEnd;
   const pace = [];
   for (let d = ws; d <= paceEnd; d = addDays(d, 1)) {
     let sum = 0;

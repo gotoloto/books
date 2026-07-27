@@ -198,18 +198,26 @@ export function records(byBook, books, gWpp, today) {
   return { bestDay, bestWeek, bestMonth, streak, longestStreak, total, daysRead: perDay.size };
 }
 
+// An unstarted day doesn't count: today joins rate denominators only once pages
+// are logged on it. Until then the last counted day is yesterday (which becomes
+// a real zero-day on its own once the calendar moves past it).
+export function effectiveToday(entries, today) {
+  return entries.some((e) => e.date === today) ? today : addDays(today, -1);
+}
+
 // ——— recent pace (actual pages/day, all books) ———
 // Trailing-14-day mean in raw pages; denominator shrinks while history is young
 // (mirrors forecast()). Raw pages because queue estimates have no measured wpp.
 export function recentPacePages(entries, today) {
   if (!entries.length) return 0;
+  const end = effectiveToday(entries, today);
   let first = entries[0].date;
   for (const e of entries) if (e.date < first) first = e.date;
-  const denom = Math.min(14, Math.max(1, diffDays(first, today) + 1));
-  const cutoff = addDays(today, -(denom - 1));
+  const denom = Math.min(14, Math.max(1, diffDays(first, end) + 1));
+  const cutoff = addDays(end, -(denom - 1));
   let pages = 0;
   for (const e of entries) {
-    if (e.date >= cutoff && e.date <= today) pages += e.to - e.from;
+    if (e.date >= cutoff && e.date <= end) pages += e.to - e.from;
   }
   return pages / denom;
 }
@@ -219,16 +227,17 @@ export function recentPacePages(entries, today) {
 // tracking just began), zeros included. Naive on purpose.
 export function forecast(book, entries, today) {
   if (!Number.isFinite(book.totalPages) || !book.startDate) return { rate: 0, date: null };
-  const denom = Math.min(14, Math.max(1, diffDays(book.startDate, today) + 1));
-  const cutoff = addDays(today, -(denom - 1));
+  const end = effectiveToday(entries, today);
+  const denom = Math.min(14, Math.max(1, diffDays(book.startDate, end) + 1));
+  const cutoff = addDays(end, -(denom - 1));
   let pages = 0;
   for (const e of entries) {
-    if (e.book === book.id && e.date >= cutoff && e.date <= today) pages += e.to - e.from;
+    if (e.book === book.id && e.date >= cutoff && e.date <= end) pages += e.to - e.from;
   }
   const rate = pages / denom;
   if (rate <= 0) return { rate: 0, date: null, denom };
   const remaining = book.totalPages - currentPosition(book, entries);
   if (remaining <= 0) return { rate, date: today, done: true, denom };
   const daysLeft = Math.ceil(remaining / rate);
-  return { rate, date: addDays(today, daysLeft), daysLeft, denom };
+  return { rate, date: addDays(end, daysLeft), daysLeft, denom };
 }
