@@ -43,6 +43,10 @@ When Travis reports reading (any phrasing like "Book X — read pages A–B"):
 2. Check continuity: last entry's `to` for that book (or `startPage`). Mismatch → ask.
 3. Append `{date, book, from, to}` to `entries` in `data/log.json`.
    - `date` = today's local date unless the user says otherwise ("yesterday I…").
+   - "Local" means **Travis's** date, not the machine's. Cloud containers run UTC,
+     which flips to tomorrow during his evening — if the system clock disagrees with
+     him or with same-day entries, trust Travis (ask if unsure), and never redate
+     existing entries to match a clock.
    - Multiple sessions in one day = multiple entries; never merge or edit old entries
      (append-only, unless the user corrects a mistake).
    - **Keep each entry on one line** (`{ "date": …, "book": …, "from": …, "to": … }`)
