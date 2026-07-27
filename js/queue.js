@@ -1,6 +1,10 @@
 // Planned-reads queue: drag-and-drop ranking persisted to localStorage only.
 // books.json array order is the default rank; the saved order (ids) overrides.
 // Merge is self-healing: vanished ids drop out, new planned books append.
+// The override is written ONLY on an actual drag — merely viewing must never
+// pin the current default, or books.json reorders (the cross-device sync
+// mechanism) stop showing up on devices that just looked at the tab. The v1
+// key did exactly that; bumping to v2 orphans every stale pinned snapshot.
 
 import { currentPosition, recentPacePages } from "./derive.js";
 import { spineWidth, hashCode } from "./library.js";
@@ -8,7 +12,8 @@ import {
   isProse, cap, countBooksWord, durationWord, lengthWord, ordinalWord, paceWord,
 } from "./prose.js";
 
-const KEY = "books:queue-order:v1";
+const KEY = "books:queue-order:v2";
+try { localStorage.removeItem("books:queue-order:v1"); } catch { /* private mode */ }
 
 // Queue spines stay undyed (alternating tans) — a book earns its palette color
 // only when it starts. Same width/height rules as the Library shelves.
@@ -25,9 +30,7 @@ function loadOrder(planned) {
     saved = JSON.parse(localStorage.getItem(KEY) || "[]");
   } catch { /* corrupted — fall back to default */ }
   const kept = saved.filter((id) => ids.includes(id));
-  const merged = [...kept, ...ids.filter((id) => !kept.includes(id))];
-  try { localStorage.setItem(KEY, JSON.stringify(merged)); } catch { /* private mode */ }
-  return merged;
+  return [...kept, ...ids.filter((id) => !kept.includes(id))];
 }
 
 function saveOrder(order) {

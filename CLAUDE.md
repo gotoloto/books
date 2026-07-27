@@ -124,7 +124,10 @@ autocomplete response's `numPages`) so the queue ETA stays honest; other fields 
 Queue order does NOT sync between devices (localStorage is per-browser). When Travis
 asks to persist a ranking — by listing it, screenshotting his queue, or "move X to
 #2" — reorder the planned entries in books.json to match and push. That commit is
-the sync mechanism.
+the sync mechanism. The local override is only written when he actually drags on
+that device — merely viewing the tab must never pin the default (that was the v1
+bug that hid books.json reorders). A device he never dragged on tracks books.json;
+one he dragged on keeps its own order by design.
 
 ## pages vs pages* (the whole point of the site)
 
@@ -158,7 +161,7 @@ css/style.css     palette tokens, chessboard motif, hard edges, serif stack
 js/derive.js      pure math: dates (UTC-safe), wpp, aggregation — has no DOM
 js/main.js        fetch (no-cache), router, error banner
 js/library.js     reading cards + finished shelf
-js/queue.js       drag-drop ranking, localStorage `books:queue-order:v1`
+js/queue.js       drag-drop ranking, localStorage `books:queue-order:v2` (drag-only writes)
 js/charts.js      hand-rolled SVG primitives + tooltip
 js/prose.js       prose-mode store + the number→word lexicon
 js/stats.js       records strip, cumulative chart, daily scatter, log table, PALETTE
