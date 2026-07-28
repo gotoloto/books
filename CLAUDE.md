@@ -187,8 +187,11 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
   slot; the palette order is CVD-validated — don't reorder it.
 - Stats definitions: week = Mon–Sun (records + heatmap columns); month = calendar
   month; heatmap bins (1/15/30/50 pp*) are display-only and tunable in js/charts.js;
-  forecast = the book's raw pages over the trailing 14 calendar days (shorter
-  denominator until day 14), zeros included — naive on purpose.
+  forecast = the **all-books universal pace** (raw pages over the trailing 14
+  calendar days, shorter denominator until day 14, zeros included) applied to each
+  book's remaining pages — i.e., "done by X assuming all subsequent reading goes to
+  this book". Book-agnostic by Travis's call (2026-07-27); "paused" appears only
+  when nothing at all was logged in the window, never per-book.
 - **Unstarted-today rule** (`effectiveToday` in js/derive.js): a day with no logged
   pages joins rate denominators (forecast, queue ETA, rolling pace) only once pages
   are logged on it or the calendar moves past it. A quiet morning must not halve
