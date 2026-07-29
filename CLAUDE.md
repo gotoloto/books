@@ -47,6 +47,9 @@ When Travis reports reading (any phrasing like "Book X — read pages A–B"):
      which flips to tomorrow during his evening — if the system clock disagrees with
      him or with same-day entries, trust Travis (ask if unsure), and never redate
      existing entries to match a clock.
+   - **Morning reports are usually last night's reading.** If a dateless report
+     arrives early in the day and yesterday has no entry yet, ask ("last night, or
+     this morning?") instead of defaulting to the clock — he's had to correct this.
    - Multiple sessions in one day = multiple entries; never merge or edit old entries
      (append-only, unless the user corrects a mistake).
    - **Keep each entry on one line** (`{ "date": …, "book": …, "from": …, "to": … }`)
