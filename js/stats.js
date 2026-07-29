@@ -49,7 +49,9 @@ function windowRange(state) {
   if (ui.preset === "custom" && ui.customStart && ui.customEnd && ui.customStart <= ui.customEnd) {
     return [ui.customStart, ui.customEnd];
   }
-  const end = state.today;
+  // Windows end at the last COUNTED day: an unstarted today stays off the
+  // charts entirely (no phantom zero-plateau) until pages land on it.
+  const end = effectiveToday(state.entries, state.today);
   if (ui.preset === "all") {
     let s = day0(state);
     if (diffDays(s, end) < 13) s = addDays(end, -13); // breathing room early on
@@ -226,8 +228,11 @@ function renderCharts(state) {
     .map((s) => `<span class="key"><span class="swatch" style="background:${s.color}"></span>${esc(s.title)}</span>`)
     .join("");
 
+  // Pass effectiveToday as the plateau clamp so custom windows reaching past
+  // the last counted day don't draw a flat line through an unstarted today.
   renderCumulative(document.getElementById("chart-a"), series, {
-    winStart: ws, winEnd: we, today: state.today, unitLabel, prose: isProse(),
+    winStart: ws, winEnd: we, today: effectiveToday(state.entries, state.today),
+    unitLabel, prose: isProse(),
   });
 
   const pts = dailyPoints(state.daily, ws, we).map((p) => {
@@ -331,7 +336,9 @@ export function renderStats(state) {
   perDay = perDayTotals(state.daily, state.books, state.gWpp);
   buildControls(state);
   renderRecords(state);
-  renderHeatmap(document.getElementById("heatmap"), perDay, { today: state.today, prose: isProse() });
+  renderHeatmap(document.getElementById("heatmap"), perDay, {
+    today: effectiveToday(state.entries, state.today), prose: isProse(),
+  });
   renderCharts(state);
   renderNormNote(state);
   renderLogTable(state);

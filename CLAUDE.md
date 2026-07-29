@@ -198,5 +198,7 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
 - **Unstarted-today rule** (`effectiveToday` in js/derive.js): a day with no logged
   pages joins rate denominators (forecast, queue ETA, rolling pace) only once pages
   are logged on it or the calendar moves past it. A quiet morning must not halve
-  the pace; a truly skipped day still counts as zero afterward.
+  the pace; a truly skipped day still counts as zero afterward. The same rule
+  governs display: chart windows, the cumulative plateau, and the heatmap all end
+  at the last counted day — an unstarted today never appears as a zero on any chart.
 - Keep this file updated when workflows change.
