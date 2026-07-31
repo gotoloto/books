@@ -112,10 +112,12 @@ export function paceWord(ppd) {
   ], "devouring");
 }
 
-// pp* in a single day
+// pp* in a single day. The low end is deliberately fine-grained: a thin day
+// that keeps the streak alive deserves its own words, not borrowed dignity.
 export function sessionWord(v) {
   return pick(v, [
-    [5, "a token appearance"],
+    [3, "a token appearance"],
+    [8, "a few pages before sleep"],
     [15, "a modest sitting"],
     [30, "a solid session"],
     [50, "a good long stretch"],
