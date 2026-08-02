@@ -101,6 +101,8 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
 1. `totalPages` — the physical copy's last numbered page (ask Travis). Planned
    entries already carry a **Goodreads estimate** (for the queue ETA) — always
    re-confirm against the physical copy when the book starts; they often differ.
+   The queue marks estimates with `~`; a measured `wordsPerPage` is the proxy for
+   "physical copy confirmed", which drops the tilde (js/queue.js `verified`).
 2. `startPage` — 0 unless starting mid-book, `startDate` — first tracked day.
 3. `wordsPerPage` — ask Travis for photos of ~5 representative pages. On his laptop
    they live under `Page Scans/` (which now also holds the old `<book> pages/`

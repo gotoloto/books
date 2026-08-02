@@ -37,14 +37,19 @@ function saveOrder(order) {
   try { localStorage.setItem(KEY, JSON.stringify(order)); } catch { /* private mode */ }
 }
 
+// A measured book was held in hand — its page count is the physical copy's,
+// not a Goodreads estimate. Verified counts drop the "~".
+const verified = (b) => Number.isFinite(b.wordsPerPage);
+
 // Queue totals + time-to-clear at the reader's recent pace. Page counts on
-// planned books are Goodreads estimates (~), refined when a book starts.
+// unmeasured planned books are Goodreads estimates (~), refined when measured.
 function renderEta(planned, state, pace) {
   const box = document.getElementById("queue-eta");
   if (!box) return;
   const known = planned.filter((b) => Number.isFinite(b.totalPages));
   const total = known.reduce((a, b) => a + b.totalPages, 0);
   const unknown = planned.length - known.length;
+  const anyEstimate = known.some((b) => !verified(b));
   const onTheGo = state.books
     .filter((b) => b.status === "reading" && Number.isFinite(b.totalPages))
     .reduce((a, b) => a + (b.totalPages - currentPosition(b, state.entries)), 0);
@@ -61,7 +66,7 @@ function renderEta(planned, state, pace) {
     box.innerHTML = text + ".";
     return;
   }
-  let text = `<b>${planned.length}</b> book${planned.length === 1 ? "" : "s"} · ~<b>${total.toLocaleString()}</b> pages`;
+  let text = `<b>${planned.length}</b> book${planned.length === 1 ? "" : "s"} · ${anyEstimate ? "~" : ""}<b>${total.toLocaleString()}</b> pages`;
   if (unknown) text += ` (${unknown} uncounted)`;
   if (pace > 0) {
     const days = Math.ceil(total / pace);
@@ -87,7 +92,7 @@ function renderShelf(order, byId) {
       const h = 150 + (hashCode(b.id) % 4) * 10;
       const tip = isProse()
         ? `${b.title} — ${b.author}, ${lengthWord(star)}`
-        : `${b.title} — ${b.author}${Number.isFinite(b.totalPages) ? `, ~${b.totalPages} pp` : ""}`;
+        : `${b.title} — ${b.author}${Number.isFinite(b.totalPages) ? `, ${verified(b) ? "" : "~"}${b.totalPages} pp` : ""}`;
       return `<div class="spine" style="width:${spineWidth(star)}px;height:${h}px;background:${QUEUE_TANS[i % 2]};color:var(--ink)" title="${esc(tip)}"><span class="t">${esc(b.title)}</span></div>`;
     })
     .join("");
@@ -129,7 +134,7 @@ export function renderQueue(state) {
         <span class="meta"><b>${esc(b.title)}</b><span>${esc(b.author)}${
           isProse()
             ? `${Number.isFinite(b.totalPages) ? ` · ${lengthWord(b.totalPages)}` : ""}${Number.isFinite(b.totalPages) && pace > 0 ? ` · ${durationWord(b.totalPages / pace)}` : ""}`
-            : `${Number.isFinite(b.totalPages) ? ` · ~${b.totalPages} pp` : ""}${Number.isFinite(b.totalPages) && pace > 0 ? ` · ≈ ${Math.ceil(b.totalPages / pace)} days` : ""}`
+            : `${Number.isFinite(b.totalPages) ? ` · ${verified(b) ? "" : "~"}${b.totalPages} pp` : ""}${Number.isFinite(b.totalPages) && pace > 0 ? ` · ≈ ${Math.ceil(b.totalPages / pace)} days` : ""}`
         }</span></span>
         <span class="grip" aria-hidden="true">::::</span>
       </li>`;
