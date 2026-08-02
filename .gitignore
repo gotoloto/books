@@ -1,6 +1,7 @@
-# page-scan photo folders hold copyrighted scans — never commit
+# page-scan photo folders hold copyrighted scans — never commit (public repo).
+# Case-insensitive patterns: cloud sessions clone on case-sensitive filesystems.
 # (old layout: "<book> pages/" at root; new: everything under "Page Scans/")
-* pages/
 [Pp]age [Ss]cans/
+* [Pp]ages/
 .DS_Store
 .claude/
