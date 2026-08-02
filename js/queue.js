@@ -6,7 +6,7 @@
 // mechanism) stop showing up on devices that just looked at the tab. The v1
 // key did exactly that; bumping to v2 orphans every stale pinned snapshot.
 
-import { currentPosition, recentPacePages } from "./derive.js";
+import { currentPosition, recentPacePages, starFactor } from "./derive.js";
 import { spineWidth, hashCode } from "./library.js";
 import {
   isProse, cap, countBooksWord, durationWord, lengthWord, ordinalWord, paceWord,
@@ -81,14 +81,19 @@ function renderEta(planned, state, pace) {
 }
 
 // Shelf preview above the list — same shelf rules as Library, redrawn on every
-// reorder so the spines track the ranking live.
-function renderShelf(order, byId) {
+// reorder so the spines track the ranking live. Widths scale by pages* (word
+// count), like the Library shelves: measured books use their true typesetting
+// factor, unmeasured ones are estimated at factor 1 (a page is a page until
+// the photos say otherwise).
+function renderShelf(order, byId, state) {
   const box = document.getElementById("queue-shelf");
   if (!box) return;
   const spines = order
     .map((id, i) => {
       const b = byId.get(id);
-      const star = Number.isFinite(b.totalPages) ? b.totalPages : 300;
+      const star = Number.isFinite(b.totalPages)
+        ? Math.round(b.totalPages * starFactor(b, state.gWpp))
+        : 300;
       const h = 150 + (hashCode(b.id) % 4) * 10;
       const tip = isProse()
         ? `${b.title} — ${b.author}, ${lengthWord(star)}`
@@ -123,7 +128,7 @@ export function renderQueue(state) {
   let order = loadOrder(planned);
 
   function draw() {
-    renderShelf(order, byId);
+    renderShelf(order, byId, state);
     list.innerHTML = order
       .map((id, i) => {
         const b = byId.get(id);
