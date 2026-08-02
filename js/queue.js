@@ -6,7 +6,7 @@
 // mechanism) stop showing up on devices that just looked at the tab. The v1
 // key did exactly that; bumping to v2 orphans every stale pinned snapshot.
 
-import { currentPosition, recentPacePages, starFactor } from "./derive.js";
+import { currentPosition, recentPaceDetail, starFactor } from "./derive.js";
 import { spineWidth, hashCode } from "./library.js";
 import {
   isProse, cap, countBooksWord, durationWord, lengthWord, ordinalWord, paceWord,
@@ -48,6 +48,7 @@ function renderEta(planned, state, pace) {
   if (!box) return;
   const known = planned.filter((b) => Number.isFinite(b.totalPages));
   const total = known.reduce((a, b) => a + b.totalPages, 0);
+  const totalStar = known.reduce((a, b) => a + b.totalPages * starFactor(b, state.gWpp), 0);
   const unknown = planned.length - known.length;
   const anyEstimate = known.some((b) => !verified(b));
   const onTheGo = state.books
@@ -58,7 +59,7 @@ function renderEta(planned, state, pace) {
     let text = `<b>${cap(countBooksWord(planned.length))}</b>`;
     if (unknown) text += ` (some pages uncounted)`;
     if (pace > 0) {
-      text += ` — ${durationWord(total / pace)} of reading ${paceWord(pace)}`;
+      text += ` — ${durationWord(totalStar / pace)} of reading ${paceWord(pace)}`;
       if (onTheGo > 0) text += `, waiting behind what's still on the go`;
     } else {
       text += ` — the clock starts with the first logged page`;
@@ -69,10 +70,11 @@ function renderEta(planned, state, pace) {
   let text = `<b>${planned.length}</b> book${planned.length === 1 ? "" : "s"} · ${anyEstimate ? "~" : ""}<b>${total.toLocaleString()}</b> pages`;
   if (unknown) text += ` (${unknown} uncounted)`;
   if (pace > 0) {
-    const days = Math.ceil(total / pace);
+    // Time runs in pages*: normalized queue size over the normalized pace.
+    const days = Math.ceil(totalStar / pace);
     const months = days / 30.44;
     const span = days < 90 ? `${days} days` : `~${Math.round(months)} months`;
-    text += ` ≈ <b>${span}</b> at your current pace (${pace.toFixed(1)} pp/day)`;
+    text += ` ≈ <b>${span}</b> at your current pace (${pace.toFixed(1)} pp*/day)`;
     if (onTheGo > 0) text += ` — queued behind the ${onTheGo.toLocaleString()} pages still on the go`;
   } else {
     text += ` — log some reading to get a clearance forecast`;
@@ -109,7 +111,7 @@ function renderShelf(order, byId, state) {
 export function renderQueue(state) {
   const planned = state.books.filter((b) => b.status === "planned");
   const list = document.getElementById("queue-list");
-  const pace = recentPacePages(state.entries, state.today);
+  const pace = recentPaceDetail(state.entries, state.books, state.gWpp, state.today).rate;
 
   renderEta(planned, state, pace);
 
@@ -136,11 +138,14 @@ export function renderQueue(state) {
       <li class="q-row" draggable="true" data-id="${esc(id)}">
         <span class="rank">${isProse() ? ordinalWord(i + 1) : String(i + 1).padStart(2, "0")}</span>
         <span class="thumb"><img src="${esc(b.cover)}" alt="" loading="lazy"></span>
-        <span class="meta"><b>${esc(b.title)}</b><span>${esc(b.author)}${
-          isProse()
-            ? `${Number.isFinite(b.totalPages) ? ` · ${lengthWord(b.totalPages)}` : ""}${Number.isFinite(b.totalPages) && pace > 0 ? ` · ${durationWord(b.totalPages / pace)}` : ""}`
-            : `${Number.isFinite(b.totalPages) ? ` · ${verified(b) ? "" : "~"}${b.totalPages} pp` : ""}${Number.isFinite(b.totalPages) && pace > 0 ? ` · ≈ ${Math.ceil(b.totalPages / pace)} days` : ""}`
-        }</span></span>
+        <span class="meta"><b>${esc(b.title)}</b><span>${esc(b.author)}${(() => {
+          if (!Number.isFinite(b.totalPages)) return "";
+          const star = b.totalPages * starFactor(b, state.gWpp); // days run in pages*
+          if (isProse()) {
+            return ` · ${lengthWord(b.totalPages)}${pace > 0 ? ` · ${durationWord(star / pace)}` : ""}`;
+          }
+          return ` · ${verified(b) ? "" : "~"}${b.totalPages} pp${pace > 0 ? ` · ≈ ${Math.ceil(star / pace)} days` : ""}`;
+        })()}</span></span>
         <span class="grip" aria-hidden="true">::::</span>
       </li>`;
       })

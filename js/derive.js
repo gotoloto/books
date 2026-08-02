@@ -205,41 +205,40 @@ export function effectiveToday(entries, today) {
   return entries.some((e) => e.date === today) ? today : addDays(today, -1);
 }
 
-// ——— recent pace (actual pages/day, ALL books — the one true pace) ———
-// Trailing-14-day mean in raw pages; denominator shrinks while the log is young.
-// Raw pages because queue estimates have no measured wpp. Book-agnostic by
-// design: forecasts everywhere read as "if all subsequent reading went here".
-export function recentPaceDetail(entries, today) {
+// ——— recent pace (pages* per day, ALL books — the one true pace) ———
+// Trailing-14-day mean in typesetting-normalized pages*; denominator shrinks
+// while the log is young. Book-agnostic by design: forecasts everywhere read
+// as "if all subsequent reading went here". Normalized so that time estimates
+// stay honest when the current book's density differs from a target book's:
+// a day of dense Bolaño buys more airy Chambers than raw page math implies.
+export function recentPaceDetail(entries, books, gWpp, today) {
   if (!entries.length) return { rate: 0, denom: 1, end: today };
+  const factorOf = new Map(books.map((b) => [b.id, starFactor(b, gWpp)]));
   const end = effectiveToday(entries, today);
   let first = entries[0].date;
   for (const e of entries) if (e.date < first) first = e.date;
   const denom = Math.min(14, Math.max(1, diffDays(first, end) + 1));
   const cutoff = addDays(end, -(denom - 1));
-  let pages = 0;
+  let star = 0;
   for (const e of entries) {
-    if (e.date >= cutoff && e.date <= end) pages += e.to - e.from;
+    if (e.date >= cutoff && e.date <= end) star += (e.to - e.from) * (factorOf.get(e.book) ?? 1);
   }
-  return { rate: pages / denom, denom, end };
-}
-
-export function recentPacePages(entries, today) {
-  return recentPaceDetail(entries, today).rate;
+  return { rate: star / denom, denom, end };
 }
 
 // ——— finish forecast ———
 // Rate = the book's actual pages over the trailing 14 calendar days (shorter if
 // tracking just began), zeros included. Naive on purpose.
-// Universal-pace forecast (Travis's call): the book's remaining pages at the
-// ALL-books pace — "done by X, assuming all subsequent reading goes here."
-// A book idle for weeks still gets a date (the refocus hypothetical); "paused"
-// now only means no reading at all in the trailing window.
-export function forecast(book, entries, today) {
+// Universal-pace forecast (Travis's call): the book's remaining pages* at the
+// ALL-books pages*/day pace — "done by X, assuming all subsequent reading goes
+// here." A book idle for weeks still gets a date (the refocus hypothetical);
+// "paused" only means no reading at all in the trailing window.
+export function forecast(book, entries, books, gWpp, today) {
   if (!Number.isFinite(book.totalPages) || !book.startDate) return { rate: 0, date: null };
-  const { rate, denom, end } = recentPaceDetail(entries, today);
+  const { rate, denom, end } = recentPaceDetail(entries, books, gWpp, today);
   if (rate <= 0) return { rate: 0, date: null, denom };
   const remaining = book.totalPages - currentPosition(book, entries);
   if (remaining <= 0) return { rate, date: today, done: true, denom };
-  const daysLeft = Math.ceil(remaining / rate);
+  const daysLeft = Math.ceil((remaining * starFactor(book, gWpp)) / rate);
   return { rate, date: addDays(end, daysLeft), daysLeft, denom };
 }
