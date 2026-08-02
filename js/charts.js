@@ -259,7 +259,9 @@ export function renderDaily(container, points, opts) {
     }));
     const cap = document.createElement("p");
     cap.className = "footnote";
-    cap.textContent = prose ? "– – the shape of the week" : "– – 7-day rolling pace (pp*/day)";
+    cap.textContent = prose
+      ? "– – the shape of the week"
+      : `– – 7-day rolling pace (${unitLabel === "pages" ? "pp" : "pp*"}/day)`;
     container.appendChild(cap);
   }
   const y0 = f.y(0).toFixed(1);
@@ -312,7 +314,7 @@ const HEAT_LABELS = ["0", "1–14", "15–29", "30–49", "50+"];
 const heatBin = (v) => (v <= 0 ? 0 : v < 15 ? 1 : v < 30 ? 2 : v < 50 ? 3 : 4);
 
 export function renderHeatmap(container, perDay, opts) {
-  const { today, prose } = opts;
+  const { today, prose, unit = "pp*" } = opts;
   container.innerHTML = "";
   const CELL = 13, PITCH = 16, LEFT = 34, TOP = 18;
   const start = mondayOf(addDays(today, -364)); // Monday on/before one year ago
@@ -350,8 +352,8 @@ export function renderHeatmap(container, perDay, opts) {
       const d = addDays(colMonday, r);
       if (d > today) break;
       const info = perDay.get(d);
-      const star = info ? info.star : 0;
-      const bin = heatBin(star);
+      const v = info ? info.v : 0;
+      const bin = heatBin(v);
       const rect = el("rect", {
         x: LEFT + w * PITCH, y: TOP + r * PITCH, width: CELL, height: CELL, fill: HEAT_BINS[bin],
       });
@@ -360,7 +362,7 @@ export function renderHeatmap(container, perDay, opts) {
         rect.setAttribute("stroke-width", 1);
       } else {
         rect.setAttribute("data-i", meta.length);
-        meta.push({ date: d, star, titles: info.titles });
+        meta.push({ date: d, v, titles: info.titles });
       }
       svg.appendChild(rect);
     }
@@ -378,8 +380,8 @@ export function renderHeatmap(container, perDay, opts) {
     tooltipShow(
       container,
       prose
-        ? `<span class="tt-date">${dateWord(m.date)}</span><b>${sessionWord(m.star)}</b> · ${esc(m.titles.join(", "))}`
-        : `<span class="tt-date">${fmtLong(m.date)}</span><b>${Math.round(m.star)} pp*</b> · ${esc(m.titles.join(", "))}`,
+        ? `<span class="tt-date">${dateWord(m.date)}</span><b>${sessionWord(m.v)}</b> · ${esc(m.titles.join(", "))}`
+        : `<span class="tt-date">${fmtLong(m.date)}</span><b>${Math.round(m.v)} ${unit}</b> · ${esc(m.titles.join(", "))}`,
       e.clientX, e.clientY
     );
   };
@@ -397,7 +399,7 @@ export function renderHeatmap(container, perDay, opts) {
       " devoted"
     : HEAT_BINS.map((c, i) =>
         `<span class="cell" style="background:${c}${i === 0 ? ";border:1px solid #C7B58F" : ""}"></span>${HEAT_LABELS[i]}`
-      ).join(" ") + " pp*";
+      ).join(" ") + ` ${unit}`;
   container.appendChild(legend);
 
   // Open scrolled to today (the right edge) on narrow screens.

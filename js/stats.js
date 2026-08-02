@@ -19,8 +19,11 @@ const DAY0 = "2026-07-26";
 
 const ui = { preset: "1m", unit: "star", customStart: null, customEnd: null, built: false };
 
-// Window-independent per-day pp* rollup; refreshed on each stats activation.
+// Window-independent per-day rollup in the ACTIVE unit; refreshed on each
+// stats render. The pages/pages* toggle governs the whole stats page; prose
+// mode always thinks in pages* (its word-buckets are tuned to the true page).
 let perDay = new Map();
+const unitStar = () => isProse() || ui.unit === "star";
 
 function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -117,7 +120,7 @@ function buildControls(state) {
     b.textContent = text;
     b.addEventListener("click", () => {
       ui.unit = key;
-      renderCharts(state);
+      renderStats(state); // the unit governs every stats surface, not just charts
     });
     sw.appendChild(b);
   }
@@ -135,7 +138,8 @@ function syncControls() {
 }
 
 function renderRecords(state) {
-  const r = records(state.daily, state.books, state.gWpp, state.today);
+  const r = records(state.daily, state.books, state.gWpp, state.today, unitStar());
+  const U = unitStar() ? "pp*" : "pp";
   if (isProse()) {
     const t = state.today;
     const tiles = [
@@ -166,15 +170,15 @@ function renderRecords(state) {
   const days = (n) => `${n} <small>${n === 1 ? "day" : "days"}</small>`;
   const tiles = [
     {
-      val: r.bestDay ? `${Math.round(r.bestDay.value)} <small>pp*</small>` : "—",
+      val: r.bestDay ? `${Math.round(r.bestDay.value)} <small>${U}</small>` : "—",
       lbl: r.bestDay ? `best day · ${fmtShort(r.bestDay.date)}` : "best day",
     },
     {
-      val: r.bestWeek ? `${Math.round(r.bestWeek.value)} <small>pp*</small>` : "—",
+      val: r.bestWeek ? `${Math.round(r.bestWeek.value)} <small>${U}</small>` : "—",
       lbl: r.bestWeek ? `best week · wk of ${fmtShort(r.bestWeek.start)}` : "best week",
     },
     {
-      val: r.bestMonth ? `${Math.round(r.bestMonth.value)} <small>pp*</small>` : "—",
+      val: r.bestMonth ? `${Math.round(r.bestMonth.value)} <small>${U}</small>` : "—",
       lbl: r.bestMonth ? `best month · ${fmtMonthYear(r.bestMonth.ym + "-01")}` : "best month",
     },
     {
@@ -188,7 +192,7 @@ function renderRecords(state) {
       lbl: "current streak",
     },
     {
-      val: `${Math.round(r.total)} <small>pp*</small>`,
+      val: `${Math.round(r.total)} <small>${U}</small>`,
       lbl: `since day 0 · ${r.daysRead} ${r.daysRead === 1 ? "day" : "days"} read`,
     },
   ];
@@ -200,7 +204,7 @@ function renderRecords(state) {
 function renderCharts(state) {
   syncControls();
   const [ws, we] = windowRange(state);
-  const useStar = ui.unit === "star";
+  const useStar = unitStar();
   const unitLabel = useStar ? "pages*" : "pages";
 
   const series = [];
@@ -241,12 +245,12 @@ function renderCharts(state) {
       date: p.date,
       title: b ? b.title : p.bookId,
       ranges: p.ranges,
-      v: p.pages * (b ? starFactor(b, state.gWpp) : 1),
+      v: p.pages * (useStar && b ? starFactor(b, state.gWpp) : 1),
     };
   });
-  // 7-day rolling mean of total pp*/day (zeros count; may look back before the
-  // window via the full perDay map). Chart B is always pp* — toggle never applies.
-  // An unstarted today stays out of the line (effectiveToday rule).
+  // 7-day rolling mean of the daily totals in the ACTIVE unit (zeros count;
+  // may look back before the window via the full perDay map). An unstarted
+  // today stays out of the line (effectiveToday rule).
   const effEnd = effectiveToday(state.entries, state.today);
   const paceEnd = we < effEnd ? we : effEnd;
   const pace = [];
@@ -254,12 +258,12 @@ function renderCharts(state) {
     let sum = 0;
     for (let k = 0; k < 7; k++) {
       const v = perDay.get(addDays(d, -k));
-      if (v) sum += v.star;
+      if (v) sum += v.v;
     }
     pace.push({ date: d, v: sum / 7 });
   }
   renderDaily(document.getElementById("chart-b"), pts, {
-    winStart: ws, winEnd: we, unitLabel: "pages*", pace, prose: isProse(),
+    winStart: ws, winEnd: we, unitLabel, pace, prose: isProse(),
   });
 }
 
@@ -286,19 +290,22 @@ function renderLogTable(state) {
     box.innerHTML = '<p class="empty-note">No entries yet.</p>';
     return;
   }
-  // Day granularity: one row per (book, day); same-day sessions merge into one range.
+  // Day granularity: one row per (book, day); same-day sessions merge into one
+  // range. The value column follows the page-wide unit toggle (Range stays in
+  // real page numbers — positions are physical facts).
+  const useStar = unitStar();
+  const U = useStar ? "pp*" : "pp";
   const rows = [];
   for (const [bookId, days] of state.daily) {
     const b = state.byId.get(bookId);
-    const f = b ? starFactor(b, state.gWpp) : 1;
+    const f = useStar && b ? starFactor(b, state.gWpp) : 1;
     for (const [date, info] of days) {
       rows.push({
         date,
         title: b ? b.title : bookId,
         from: info.ranges[0][0],
         to: info.ranges[info.ranges.length - 1][1],
-        pages: info.pages,
-        star: Math.round(info.pages * f),
+        val: Math.round(info.pages * f),
       });
     }
   }
@@ -308,7 +315,7 @@ function renderLogTable(state) {
       .map((r) => `<tr>
         <td>${cap(dateWord(r.date, state.today))}</td>
         <td>${esc(r.title)}</td>
-        <td>${cap(sessionWord(r.star))}</td>
+        <td>${cap(sessionWord(r.val))}</td>
       </tr>`)
       .join("");
     box.innerHTML = `<table class="log">
@@ -322,22 +329,23 @@ function renderLogTable(state) {
         <td>${fmtLong(r.date)}</td>
         <td>${esc(r.title)}</td>
         <td class="num">${r.from} → ${r.to}</td>
-        <td class="num">${r.pages}</td>
-        <td class="num">${r.star}</td>
+        <td class="num">${r.val}</td>
       </tr>`)
     .join("");
   box.innerHTML = `<table class="log">
-    <thead><tr><th>Date</th><th>Book</th><th class="num">Range</th><th class="num">pp</th><th class="num">pp*</th></tr></thead>
+    <thead><tr><th>Date</th><th>Book</th><th class="num">Range</th><th class="num">${U}</th></tr></thead>
     <tbody>${html}</tbody>
   </table>`;
 }
 
 export function renderStats(state) {
-  perDay = perDayTotals(state.daily, state.books, state.gWpp);
+  perDay = perDayTotals(state.daily, state.books, state.gWpp, unitStar());
   buildControls(state);
   renderRecords(state);
   renderHeatmap(document.getElementById("heatmap"), perDay, {
-    today: effectiveToday(state.entries, state.today), prose: isProse(),
+    today: effectiveToday(state.entries, state.today),
+    prose: isProse(),
+    unit: unitStar() ? "pp*" : "pp",
   });
   renderCharts(state);
   renderNormNote(state);

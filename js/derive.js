@@ -133,16 +133,17 @@ export function dailyPoints(byBook, winStart, winEnd) {
 
 // ——— per-day rollup (day is the display granularity everywhere) ———
 
-// Map<date, {star, titles[]}> — total pages* and the books touched that day.
-export function perDayTotals(byBook, books, gWpp) {
+// Map<date, {v, titles[]}> — the day's total in the chosen unit (pages* when
+// useStar, raw pages otherwise) and the books touched that day.
+export function perDayTotals(byBook, books, gWpp, useStar = true) {
   const map = new Map();
   for (const [bookId, days] of byBook) {
     const book = books.find((b) => b.id === bookId);
-    const f = book ? starFactor(book, gWpp) : 1;
+    const f = useStar && book ? starFactor(book, gWpp) : 1;
     for (const [date, info] of days) {
-      if (!map.has(date)) map.set(date, { star: 0, titles: [] });
+      if (!map.has(date)) map.set(date, { v: 0, titles: [] });
       const d = map.get(date);
-      d.star += info.pages * f;
+      d.v += info.pages * f;
       d.titles.push(book && book.title ? book.title : bookId);
     }
   }
@@ -151,19 +152,19 @@ export function perDayTotals(byBook, books, gWpp) {
 
 // ——— records ———
 
-export function records(byBook, books, gWpp, today) {
-  const perDay = perDayTotals(byBook, books, gWpp);
+export function records(byBook, books, gWpp, today, useStar = true) {
+  const perDay = perDayTotals(byBook, books, gWpp, useStar);
   let bestDay = null;
   let total = 0;
-  const weeks = new Map();   // ISO-Monday -> pages*
-  const months = new Map();  // "YYYY-MM"  -> pages*
+  const weeks = new Map();   // ISO-Monday -> unit total
+  const months = new Map();  // "YYYY-MM"  -> unit total
   for (const [date, v] of perDay) {
-    total += v.star;
-    if (!bestDay || v.star > bestDay.value) bestDay = { date, value: v.star };
+    total += v.v;
+    if (!bestDay || v.v > bestDay.value) bestDay = { date, value: v.v };
     const wk = mondayOf(date);
-    weeks.set(wk, (weeks.get(wk) || 0) + v.star);
+    weeks.set(wk, (weeks.get(wk) || 0) + v.v);
     const ym = date.slice(0, 7);
-    months.set(ym, (months.get(ym) || 0) + v.star);
+    months.set(ym, (months.get(ym) || 0) + v.v);
   }
   // Sorted iteration → deterministic tie-breaks (earliest wins).
   let bestWeek = null;
