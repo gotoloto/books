@@ -102,9 +102,12 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
    entries already carry a **Goodreads estimate** (for the queue ETA) — always
    re-confirm against the physical copy when the book starts; they often differ.
 2. `startPage` — 0 unless starting mid-book, `startDate` — first tracked day.
-3. `wordsPerPage` — ask Travis for photos of ~5 representative pages, dropped in a
-   folder named like `<book> pages/` (anything matching `* pages/` is gitignored —
-   **page scans must never be committed; the repo is public**). OCR each photo:
+3. `wordsPerPage` — ask Travis for photos of ~5 representative pages. On his laptop
+   they live under `Page Scans/` (which now also holds the old `<book> pages/`
+   folders; both patterns are gitignored — **page scans must never be committed;
+   the repo is public**). Gitignored folders never reach GitHub, so cloud/mobile
+   sessions cannot see them — there, ask Travis to attach the photos in chat
+   instead (or measure from a laptop session that has the folder). OCR each photo:
    count text lines exactly, sample several full lines for words-per-line, estimate
    words per page; average across photos; round to an integer. Show the per-page
    numbers so Travis can sanity-check. (2666's five pages gave 440/440/436/482/486 → 457.)

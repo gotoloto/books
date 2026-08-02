@@ -1,4 +1,6 @@
-# page-scan photo folders ("<book> pages/") hold copyrighted scans — never commit
+# page-scan photo folders hold copyrighted scans — never commit
+# (old layout: "<book> pages/" at root; new: everything under "Page Scans/")
 * pages/
+[Pp]age [Ss]cans/
 .DS_Store
 .claude/
