@@ -106,13 +106,10 @@ function buildControls(state) {
   c.appendChild(dash);
   c.appendChild(mkDate("end"));
 
-  const gap = document.createElement("span");
-  gap.className = "gap";
-  c.appendChild(gap);
-
+  const dock = document.getElementById("unit-dock");
   const sw = document.createElement("span");
   sw.className = "unit-switch";
-  for (const [key, text] of [["raw", "pages"], ["star", "pages*"]]) {
+  for (const [key, text] of [["star", "pages*"], ["raw", "pages"]]) {
     const b = document.createElement("button");
     b.className = "btn";
     b.dataset.unit = key;
@@ -124,7 +121,7 @@ function buildControls(state) {
     });
     sw.appendChild(b);
   }
-  c.appendChild(sw);
+  dock.appendChild(sw);
 }
 
 function syncControls() {
@@ -132,7 +129,7 @@ function syncControls() {
     b.setAttribute("aria-pressed", String(b.dataset.preset === ui.preset));
     b.textContent = PRESET_LABELS[b.dataset.preset][isProse() ? 1 : 0];
   }
-  for (const b of document.querySelectorAll("#controls .btn[data-unit]")) {
+  for (const b of document.querySelectorAll("#unit-dock .btn[data-unit]")) {
     b.setAttribute("aria-pressed", String(b.dataset.unit === ui.unit));
   }
 }
