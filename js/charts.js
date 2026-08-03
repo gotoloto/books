@@ -229,18 +229,20 @@ export function renderCumulative(container, series, opts) {
   f.svg.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); tooltipHide(); });
 }
 
-// ——— Chart B: daily scatter ———
-// points: [{date, title, ranges, v}] — v in pages*; tooltip shows the day's real
-// page range (sessions merge: first from → last to). opts.pace = [{date, v}] draws
-// the 7-day rolling mean as a dashed line.
+// ——— Chart B: daily lollipops ———
+// days: [{date, total, segments: [{title, color, ranges, v}]}] — ONE lollipop
+// per day (day granularity). Multi-book days stack their stem in book colors,
+// bottom-up in stable book order, with a hairline eggshell cut at each joint;
+// the dot wears the top segment's color. opts.pace = [{date, v}] draws the
+// 7-day rolling mean as a dashed line.
 
-export function renderDaily(container, points, opts) {
+export function renderDaily(container, days, opts) {
   const { winStart, winEnd, unitLabel, pace = [], prose } = opts;
-  if (!points.length) {
+  if (!days.length) {
     container.innerHTML = `<div class="chart-empty">No reading logged in this window.</div>`;
     return;
   }
-  const maxVal = Math.max(...points.map((p) => p.v), ...pace.map((p) => p.v));
+  const maxVal = Math.max(...days.map((d) => d.total), ...pace.map((p) => p.v));
   const f = frame(container, 280, winStart, winEnd, maxVal, unitLabel, prose);
 
   const meta = [];
@@ -264,41 +266,70 @@ export function renderDaily(container, points, opts) {
       : `– – 7-day rolling pace (${unitLabel === "pages" ? "pp" : "pp*"}/day)`;
     container.appendChild(cap);
   }
-  const y0 = f.y(0).toFixed(1);
-  for (const p of points) {
-    const cx = f.x(p.date).toFixed(1);
-    const cy = f.y(p.v).toFixed(1);
-    stems.appendChild(el("line", {
-      x1: cx, x2: cx, y1: y0, y2: cy,
-      stroke: "#3A7A33", "stroke-width": 1.5, "stroke-opacity": 0.4,
+
+  for (const day of days) {
+    const cx = f.x(day.date).toFixed(1);
+    let cum = 0;
+    for (const seg of day.segments) {
+      const yBot = f.y(cum).toFixed(1);
+      const yTop = f.y(cum + seg.v).toFixed(1);
+      stems.appendChild(el("line", {
+        x1: cx, x2: cx, y1: yBot, y2: yTop,
+        stroke: seg.color, "stroke-width": 2, "stroke-opacity": 0.85,
+      }));
+      cum += seg.v;
+      // chessboard cut where the next book takes over
+      if (cum < day.total - 1e-9) {
+        stems.appendChild(el("line", {
+          x1: (f.x(day.date) - 2.5).toFixed(1), x2: (f.x(day.date) + 2.5).toFixed(1),
+          y1: f.y(cum).toFixed(1), y2: f.y(cum).toFixed(1),
+          stroke: "#F0EAD6", "stroke-width": 1.5,
+        }));
+      }
+    }
+    const topColor = day.segments[day.segments.length - 1].color;
+    const cy = f.y(day.total).toFixed(1);
+    dots.appendChild(el("circle", { cx, cy, r: 4.5, fill: topColor, "fill-opacity": 0.9, stroke: "#F0EAD6", "stroke-width": 1 }));
+    // one hit zone per lollipop: the whole stem plus the dot
+    dots.appendChild(el("rect", {
+      x: (f.x(day.date) - 8).toFixed(1), width: 16,
+      y: (f.y(day.total) - 12).toFixed(1),
+      height: (f.y(0) - f.y(day.total) + 12).toFixed(1),
+      fill: "transparent", "data-i": meta.length,
     }));
-    dots.appendChild(el("circle", { cx, cy, r: 4.5, fill: "#3A7A33", "fill-opacity": 0.78, stroke: "#F0EAD6", "stroke-width": 1 }));
-    const hit = el("circle", { cx, cy, r: 12, fill: "transparent", "data-i": meta.length });
-    dots.appendChild(hit);
-    meta.push(p);
+    meta.push(day);
   }
 
-  const showPoint = (p, e) => {
+  const showDay = (day, e) => {
     if (prose) {
+      const names = day.segments.map((s) => `<span style="color:${s.color}">■</span> ${esc(s.title)}`).join("<br>");
       tooltipShow(
         container,
-        `<span class="tt-date">${dateWord(p.date)}</span><b>${esc(p.title)}</b><br>${sessionWord(p.v)}`,
+        `<span class="tt-date">${dateWord(day.date)}</span><b>${sessionWord(day.total)}</b><br>${names}`,
         e.clientX, e.clientY
       );
       return;
     }
-    // Day granularity: sessions merge into one contiguous range (continuity rule).
-    const range = `pp.&nbsp;${p.ranges[0][0]}–${p.ranges[p.ranges.length - 1][1]}`;
+    // Day granularity: each book's sessions merge into one contiguous range.
+    const rows = day.segments
+      .map((s) => {
+        const range = `pp.&nbsp;${s.ranges[0][0]}–${s.ranges[s.ranges.length - 1][1]}`;
+        return `<span style="color:${s.color}">■</span> ${esc(s.title)} — ${range} · ${Math.round(s.v)}`;
+      })
+      .join("<br>");
+    const head = day.segments.length > 1
+      ? `<b>${Math.round(day.total)} ${unitLabel}</b><br>`
+      : "";
     tooltipShow(
       container,
-      `<span class="tt-date">${fmtLong(p.date)}</span><b>${esc(p.title)}</b><br>${range}<br>${Math.round(p.v)} ${unitLabel}`,
+      `<span class="tt-date">${fmtLong(day.date)}</span>${head}${rows}${day.segments.length > 1 ? "" : ` ${unitLabel}`}`,
       e.clientX, e.clientY
     );
   };
   const onPointer = (e) => {
     const hit = e.target.closest("[data-i]");
     if (!hit) { tooltipHide(); return; }
-    showPoint(meta[Number(hit.getAttribute("data-i"))], e);
+    showDay(meta[Number(hit.getAttribute("data-i"))], e);
   };
   f.svg.addEventListener("mousemove", onPointer);
   f.svg.addEventListener("click", onPointer); // tap-to-show for touch

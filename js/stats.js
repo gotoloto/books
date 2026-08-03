@@ -236,15 +236,32 @@ function renderCharts(state) {
     unitLabel, prose: isProse(),
   });
 
-  const pts = dailyPoints(state.daily, ws, we).map((p) => {
+  // One lollipop per day: group the (book, day) cells into stacked segments,
+  // bottom-up in stable book order (earliest-tracked at the base) so colors
+  // always stack the same way across days.
+  const trackedOrder = state.books
+    .filter((b) => b.status !== "planned")
+    .sort((a, b) => ((a.startDate || "") < (b.startDate || "") ? -1 : 1))
+    .map((b) => b.id);
+  const byDate = new Map();
+  for (const p of dailyPoints(state.daily, ws, we)) {
     const b = state.byId.get(p.bookId);
-    return {
-      date: p.date,
+    const seg = {
       title: b ? b.title : p.bookId,
+      color: b ? bookColor(b, state) : PALETTE[0],
       ranges: p.ranges,
       v: p.pages * (useStar && b ? starFactor(b, state.gWpp) : 1),
+      order: trackedOrder.indexOf(p.bookId),
     };
-  });
+    if (!byDate.has(p.date)) byDate.set(p.date, []);
+    byDate.get(p.date).push(seg);
+  }
+  const days = [...byDate.entries()]
+    .sort((a, b) => (a[0] < b[0] ? -1 : 1))
+    .map(([date, segs]) => {
+      segs.sort((x, y) => x.order - y.order);
+      return { date, segments: segs, total: segs.reduce((a, s) => a + s.v, 0) };
+    });
   // 7-day rolling mean of the daily totals in the ACTIVE unit (zeros count;
   // may look back before the window via the full perDay map). An unstarted
   // today stays out of the line (effectiveToday rule).
@@ -259,7 +276,7 @@ function renderCharts(state) {
     }
     pace.push({ date: d, v: sum / 7 });
   }
-  renderDaily(document.getElementById("chart-b"), pts, {
+  renderDaily(document.getElementById("chart-b"), days, {
     winStart: ws, winEnd: we, unitLabel, pace, prose: isProse(),
   });
 }
