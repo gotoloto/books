@@ -252,6 +252,25 @@ em.aside { color: var(--ink-soft); font-size: 15px; }
   letter-spacing: 2px;
   user-select: none;
 }
+/* forthcoming releases: thumbnail + date, nothing more */
+.fc-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  align-items: flex-end;
+}
+.fc-card { width: 104px; }
+.fc-card .cover img { border: 1px solid var(--ink); }
+.fc-card .fc-date {
+  display: block;
+  margin-top: 7px;
+  text-align: center;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.08em;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
 .q-row.dragging { opacity: 0.45; }
 .q-row.drop-above { box-shadow: 0 -4px 0 0 var(--forest); }
 .q-row.drop-below { box-shadow: 0 4px 0 0 var(--forest); }

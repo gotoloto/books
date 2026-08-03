@@ -195,5 +195,23 @@
       "startDate": null,
       "finishDate": null
     }
+  ],
+  "forthcoming": [
+    {
+      "id": "agi-chronicles",
+      "title": "The AGI Chronicles",
+      "author": "Kevin Roose",
+      "totalPages": 448,
+      "cover": "covers/agi-chronicles.jpg",
+      "releaseDate": "2026-10-06"
+    },
+    {
+      "id": "miss-lambert",
+      "title": "Miss Lambert Steps Aboard Danger",
+      "author": "Kazuo Ishiguro",
+      "totalPages": 240,
+      "cover": "covers/miss-lambert.jpg",
+      "releaseDate": "2027-03-09"
+    }
   ]
 }

@@ -35,7 +35,9 @@ async function boot() {
       fetch("data/log.json", { cache: "no-cache" }),
     ]);
     if (!booksRes.ok || !logRes.ok) throw new Error(`HTTP ${booksRes.status}/${logRes.status}`);
-    state.books = (await booksRes.json()).books;
+    const booksData = await booksRes.json();
+    state.books = booksData.books;
+    state.forthcoming = booksData.forthcoming || [];
     state.entries = (await logRes.json()).entries;
   } catch (err) {
     showBanner(

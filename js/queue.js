@@ -9,8 +9,9 @@
 import { currentPosition, recentPaceDetail, starFactor } from "./derive.js";
 import { spineWidth, hashCode } from "./library.js";
 import {
-  isProse, cap, countBooksWord, durationWord, lengthWord, ordinalWord, paceWord,
+  isProse, cap, countBooksWord, dateWord, durationWord, lengthWord, ordinalWord, paceWord,
 } from "./prose.js";
+import { fmtLong } from "./derive.js";
 
 const KEY = "books:queue-order:v2";
 try { localStorage.removeItem("books:queue-order:v1"); } catch { /* private mode */ }
@@ -108,7 +109,35 @@ function renderShelf(order, byId, state) {
     : "";
 }
 
+// Not yet published, not yet rankable: thumbnails + release dates only,
+// chronological. A title graduates into the queue (books[] as planned) when
+// it's out and Travis owns it.
+function renderForthcoming(state) {
+  const box = document.getElementById("forthcoming-section");
+  if (!box) return;
+  const list = [...(state.forthcoming || [])].sort((a, b) => (a.releaseDate < b.releaseDate ? -1 : 1));
+  if (!list.length) {
+    box.innerHTML = "";
+    return;
+  }
+  const cards = list
+    .map((f) => {
+      const when = isProse() ? dateWord(f.releaseDate, state.today) : fmtLong(f.releaseDate);
+      const tip = isProse()
+        ? `${f.title} — ${f.author}, ${lengthWord(f.totalPages ?? 300)}, due ${when}`
+        : `${f.title} — ${f.author}${Number.isFinite(f.totalPages) ? `, ~${f.totalPages} pp` : ""}, releases ${when}`;
+      return `
+    <div class="fc-card" title="${esc(tip)}">
+      <div class="cover"><img src="${esc(f.cover)}" alt="Cover of ${esc(f.title)}" loading="lazy"></div>
+      <span class="fc-date">${when}</span>
+    </div>`;
+    })
+    .join("");
+  box.innerHTML = `<h2>Forthcoming Releases</h2><div class="fc-row">${cards}</div>`;
+}
+
 export function renderQueue(state) {
+  renderForthcoming(state);
   const planned = state.books.filter((b) => b.status === "planned");
   const list = document.getElementById("queue-list");
   const pace = recentPaceDetail(state.entries, state.books, state.gWpp, state.today).rate;

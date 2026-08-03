@@ -135,6 +135,13 @@ cover the same way, and set `totalPages` to the Goodreads record's page count (t
 autocomplete response's `numPages`) so the queue ETA stays honest; other fields null. Array order of planned books = default queue rank
 (browser drag-and-drop order overrides locally via localStorage).
 
+**Forthcoming releases** (unpublished books Travis is waiting on) live in a separate
+`forthcoming` array in books.json — `{id, title, author, totalPages, cover,
+releaseDate}` — rendered beneath the queue as thumbnail + release date only,
+chronological. They are NOT queue entries: excluded from ETA, ranking, shelves, and
+every stat. When one is released and Travis has it, move it into `books` as
+`status:"planned"` (drop `releaseDate`, keep the cover) and it joins the queue.
+
 Queue order does NOT sync between devices (localStorage is per-browser). When Travis
 asks to persist a ranking — by listing it, screenshotting his queue, or "move X to
 #2" — reorder the planned entries in books.json to match and push. That commit is
