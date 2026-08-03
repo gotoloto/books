@@ -200,6 +200,9 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
   day 14, zeros included) applied to each book's remaining pages* — i.e., "done by
   X assuming all subsequent reading goes to this book". Normalized by Travis's call
   (2026-08-02): a day of dense reading buys more airy pages than raw math implies.
+  Display exception (Travis, 2026-08-02): the **library card** shows that same pace
+  divided by the book's factor — the rate in the book's own pages ("pp/day"), since
+  a card answers "my rate in this book"; the finish date is identical either way.
   Book-agnostic by Travis's call (2026-07-27); "paused" appears only when nothing
   at all was logged in the window, never per-book.
 - **Unstarted-today rule** (`effectiveToday` in js/derive.js): a day with no logged

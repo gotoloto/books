@@ -228,8 +228,6 @@ export function recentPaceDetail(entries, books, gWpp, today) {
 }
 
 // ——— finish forecast ———
-// Rate = the book's actual pages over the trailing 14 calendar days (shorter if
-// tracking just began), zeros included. Naive on purpose.
 // Universal-pace forecast (Travis's call): the book's remaining pages* at the
 // ALL-books pages*/day pace — "done by X, assuming all subsequent reading goes
 // here." A book idle for weeks still gets a date (the refocus hypothetical);

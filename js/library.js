@@ -37,11 +37,14 @@ function forecastLine(book, state) {
   }
   if (fc.done) return `<p class="forecast">Final page logged — shelve it.</p>`;
   if (!fc.rate) return `<p class="forecast">Forecast paused — no reading in the last 14 days.</p>`;
+  // The card speaks this book's own pages: the universal pp*/day pace divided
+  // by the book's factor. The finish date doesn't move — only the rate's unit.
+  const bookRate = fc.rate / starFactor(book, state.gWpp);
   if (fc.daysLeft > 730) {
-    return `<p class="forecast">Pace ${fc.rate.toFixed(1)} pp*/day — finish is years out at this pace.</p>`;
+    return `<p class="forecast">Pace ${bookRate.toFixed(1)} pp/day — finish is years out at this pace.</p>`;
   }
   const early = fc.denom < 14 ? ` — early estimate (${fc.denom}-day sample)` : "";
-  return `<p class="forecast">Pace <b>${fc.rate.toFixed(1)}</b> pp*/day · finish ≈ <b>${fmtLong(fc.date)}</b> (${fc.daysLeft} ${fc.daysLeft === 1 ? "day" : "days"})${early}</p>`;
+  return `<p class="forecast">Pace <b>${bookRate.toFixed(1)}</b> pp/day · finish ≈ <b>${fmtLong(fc.date)}</b> (${fc.daysLeft} ${fc.daysLeft === 1 ? "day" : "days"})${early}</p>`;
 }
 
 function readingCard(book, state) {
