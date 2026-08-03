@@ -45,10 +45,11 @@
       "totalPages": 175,
       "wordsPerPage": 194,
       "cover": "covers/trash.jpg",
-      "status": "planned",
-      "startPage": null,
-      "startDate": null,
-      "finishDate": null
+      "status": "reading",
+      "startPage": 0,
+      "startDate": "2026-08-02",
+      "finishDate": null,
+      "color": "#C99414"
     },
     {
       "id": "king-in-yellow",
