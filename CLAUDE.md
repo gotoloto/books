@@ -63,6 +63,12 @@ When Travis reports reading (any phrasing like "Book X — read pages A–B"):
 If the entry lands them on the last page (`to == totalPages`), congratulate them and
 also do the "finishing a book" steps.
 
+**Announcing records ("new best day!"): recompute from the data first** — run
+`records()` (js/derive.js) against the current log, never trust the conversation's
+memory of what the record was. Records can change hands *between* logging events
+(a wpp recalibration rescales history), and a chat-cached "current record" goes
+stale exactly then. This has caused a wrong announcement once.
+
 ### From the phone
 
 Travis logs from his iPhone with **Claude Code sessions at claude.ai/code (or the
