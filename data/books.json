@@ -160,18 +160,6 @@
       "finishDate": null
     },
     {
-      "id": "the-director",
-      "title": "The Director",
-      "author": "Daniel Kehlmann",
-      "totalPages": 352,
-      "wordsPerPage": null,
-      "cover": "covers/the-director.jpg",
-      "status": "planned",
-      "startPage": null,
-      "startDate": null,
-      "finishDate": null
-    },
-    {
       "id": "cloud-atlas",
       "title": "Cloud Atlas",
       "author": "David Mitchell",
@@ -190,6 +178,18 @@
       "totalPages": 320,
       "wordsPerPage": null,
       "cover": "covers/when-we-were-orphans.jpg",
+      "status": "planned",
+      "startPage": null,
+      "startDate": null,
+      "finishDate": null
+    },
+    {
+      "id": "don-quixote",
+      "title": "Don Quixote",
+      "author": "Miguel de Cervantes",
+      "totalPages": 976,
+      "wordsPerPage": null,
+      "cover": "covers/don-quixote.jpg",
       "status": "planned",
       "startPage": null,
       "startDate": null,
