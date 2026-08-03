@@ -1,7 +1,7 @@
 import { currentPosition, fmtLong, forecast, starFactor } from "./derive.js";
 import { bookColor } from "./stats.js";
 import {
-  isProse, cap, dateWord, fractionWord, lengthWord, paceWord, totalWord, wppWord,
+  isProse, cap, dateWord, fractionWord, lengthWord, paceWord, wppWord,
 } from "./prose.js";
 
 const SQUARES = 30;
@@ -51,10 +51,6 @@ function readingCard(book, state) {
   const pos = currentPosition(book, state.entries);
   const pct = (pos / book.totalPages) * 100;
   const star = pagesStar(book, state.gWpp);
-  const sinceDay0 = state.entries
-    .filter((e) => e.book === book.id)
-    .reduce((a, e) => a + (e.to - e.from), 0);
-
   const frac = fractionWord(pos / book.totalPages);
   const posLine = isProse()
     ? `${cap(frac)}.`
@@ -63,15 +59,11 @@ function readingCard(book, state) {
     ? [
         cap(lengthWord(book.totalPages)),
         wppWord(starFactor(book, state.gWpp)),
-        `since ${dateWord(book.startDate, state.today)}${book.startPage > 0 ? ", picked up midstream" : ""}`,
-        `${totalWord(sinceDay0)} so far`,
       ].map((f) => `<span>${f}</span>`).join("")
     : `
         <span><b>${book.totalPages}</b> pages</span>
         <span><b>${star ?? "—"}</b> pages<span title="normalized pages">*</span></span>
-        <span><b>${book.wordsPerPage ?? "—"}</b> words/page</span>
-        <span>tracking since <b>${fmtLong(book.startDate)}</b> (p. ${book.startPage})</span>
-        <span><b>${sinceDay0}</b> pages logged</span>`;
+        <span><b>${book.wordsPerPage ?? "—"}</b> words/page</span>`;
 
   return `
   <article class="reading-card">
