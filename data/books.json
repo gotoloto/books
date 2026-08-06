@@ -45,10 +45,10 @@
       "totalPages": 175,
       "wordsPerPage": 194,
       "cover": "covers/trash.jpg",
-      "status": "reading",
+      "status": "finished",
       "startPage": 0,
       "startDate": "2026-08-02",
-      "finishDate": null,
+      "finishDate": "2026-08-05",
       "color": "#C99414"
     },
     {
