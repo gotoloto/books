@@ -119,9 +119,18 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
    count text lines exactly, sample several full lines for words-per-line, estimate
    words per page; average across photos; round to an integer. Show the per-page
    numbers so Travis can sanity-check. (2666's five pages gave 440/440/436/482/486 → 457.)
-4. `color` — next unused hex from the validated palette in `js/stats.js`
-   (`PALETTE`, in order: forest, gold, slate, rust, teal, chestnut, plum, olive).
-   Store it explicitly on the book so colors never shift as books are added.
+4. `color` — the cover's dominant color (Travis's call, 2026-08-06), already
+   precomputed and stored for every book with a cover; nothing to do at start
+   time. Recompute only when a cover lands or changes (also for new planned
+   books, right after fetching the cover): quantize the cover (~120×180,
+   median-cut to 6, merge clusters <32 apart), then take the most-represented
+   cluster that clears 1.6:1 contrast vs the eggshell page (#F0EAD6) — or, if
+   the cover's signature hue is too pale (channel spread >60), darken that hue
+   to the floor rather than skip it. Needs PIL (`pip install pillow`; laptop
+   sessions may need photos-in-chat instead if PIL is unavailable). Show the
+   cluster census so Travis can veto a pick. Spine text picks ink vs eggshell
+   by WCAG contrast (js/library.js `relLum`). `PALETTE` in js/stats.js remains
+   only as the fallback for books with no stored color.
 5. `status: "reading"`.
 6. Cover if missing or wrong edition: Goodreads autocomplete API
    (`goodreads.com/book/auto_complete?format=json&q=…`, strip the `._SY75_`/`._SX50_`
@@ -204,8 +213,10 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
 - Local preview: `python3 -m http.server 8123` (or the `books-site` launch config) —
   `fetch()` and ES modules don't work over `file://`.
 - Cumulative chart layering: series sort by final value descending so big books
-  paint behind small ones. Colors come from `book.color`, falling back to a stable
-  slot; the palette order is CVD-validated — don't reorder it.
+  paint behind small ones. Colors come from `book.color` — since 2026-08-06 the
+  cover's dominant color (see "Starting a new book" step 4), no longer the fixed
+  palette, so series distinctness now rides on the covers themselves; the PALETTE
+  fallback (for colorless books) keeps its CVD-validated order — don't reorder it.
 - Stats definitions: week = Mon–Sun (records + heatmap columns); month = calendar
   month; heatmap bins (1/15/30/50 pp*) are display-only and tunable in js/charts.js;
   forecast & queue ETA = the **all-books universal pace in pages*/day**

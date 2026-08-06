@@ -109,10 +109,16 @@ function shelfSlot(book, state) {
 
 // ——— spine shelf: finished books as spines, width ∝ pages* ———
 
-function luma(hex) {
+// WCAG relative luminance — spine text picks whichever of ink/eggshell
+// contrasts harder against the spine color (colors now come from covers,
+// so any hue can show up here).
+function relLum(hex) {
   const n = parseInt(hex.slice(1), 16);
-  return (((n >> 16) & 255) * 299 + (((n >> 8) & 255) * 587) + (n & 255) * 114) / 1000;
+  const lin = (v) => { v /= 255; return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; };
+  return 0.2126 * lin((n >> 16) & 255) + 0.7152 * lin((n >> 8) & 255) + 0.0722 * lin(n & 255);
 }
+const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+const INK_LUM = relLum("#1E2A1E"), EGG_LUM = relLum("#F0EAD6"); // CSS --ink / --eggshell
 
 export function hashCode(s) {
   let h = 0;
@@ -140,7 +146,8 @@ function spineShelf(books, state, mode) {
         : pagesStar(b, state.gWpp) ?? b.totalPages ?? 320;
       const h = 150 + (hashCode(b.id) % 4) * 10;
       const color = bookColor(b, state);
-      const ink = luma(color) > 125 ? "var(--ink)" : "var(--eggshell)";
+      const lum = relLum(color);
+      const ink = ratio(lum, INK_LUM) >= ratio(lum, EGG_LUM) ? "var(--ink)" : "var(--eggshell)";
       const when = b[dateKey] ? (isProse() ? dateWord(b[dateKey], state.today) : fmtLong(b[dateKey])) : "";
       const tip = mode === "dnf"
         ? (isProse()
