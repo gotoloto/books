@@ -177,10 +177,11 @@ export function renderCumulative(container, series, opts) {
     f.svg.appendChild(g);
   }
 
-  // Finish pennants — drawn after every area so no series can paint over a flag.
-  // Checkered 2×2 flag on a pole at the summit; clamped inside the top margin.
+  // End-of-book pennants — drawn after every area so no series paints over a
+  // flag. Finished: checkered 2×2 in the book's color (triumph). DNF: a solid
+  // white flag (surrender). Both on a pole at the summit, clamped to the top.
   for (const s of series) {
-    if (!(s.finished && s.finishDate && s.finishDate >= winStart && s.finishDate <= winEnd)) continue;
+    if (!(s.ended && s.endDate && s.endDate >= winStart && s.endDate <= winEnd)) continue;
     const last = s.points[s.points.length - 1];
     if (!last || last.v <= 0) continue;
     const px = f.x(last.date);
@@ -189,13 +190,18 @@ export function renderCumulative(container, series, opts) {
     const flag = el("g", { "shape-rendering": "crispEdges" });
     flag.appendChild(el("line", { x1: px.toFixed(1), x2: px.toFixed(1), y1: py.toFixed(1), y2: (fy + 10).toFixed(1), stroke: "#1E2A1E", "stroke-width": 1.5 }));
     const qx = px.toFixed(1);
-    flag.appendChild(el("rect", { x: qx, y: fy, width: 5, height: 5, fill: s.color }));
-    flag.appendChild(el("rect", { x: (px + 5).toFixed(1), y: fy + 5, width: 5, height: 5, fill: s.color }));
-    flag.appendChild(el("rect", { x: (px + 5).toFixed(1), y: fy, width: 5, height: 5, fill: "#F0EAD6" }));
-    flag.appendChild(el("rect", { x: qx, y: fy + 5, width: 5, height: 5, fill: "#F0EAD6" }));
-    flag.appendChild(el("rect", { x: qx, y: fy, width: 10, height: 10, fill: "none", stroke: "#1E2A1E", "stroke-width": 1 }));
+    if (s.finished) {
+      flag.appendChild(el("rect", { x: qx, y: fy, width: 5, height: 5, fill: s.color }));
+      flag.appendChild(el("rect", { x: (px + 5).toFixed(1), y: fy + 5, width: 5, height: 5, fill: s.color }));
+      flag.appendChild(el("rect", { x: (px + 5).toFixed(1), y: fy, width: 5, height: 5, fill: "#F0EAD6" }));
+      flag.appendChild(el("rect", { x: qx, y: fy + 5, width: 5, height: 5, fill: "#F0EAD6" }));
+      flag.appendChild(el("rect", { x: qx, y: fy, width: 10, height: 10, fill: "none", stroke: "#1E2A1E", "stroke-width": 1 }));
+    } else {
+      flag.appendChild(el("rect", { x: qx, y: fy, width: 10, height: 10, fill: "#FFFFFF", stroke: "#1E2A1E", "stroke-width": 1 }));
+    }
     const t = el("title");
-    t.textContent = `${s.title} — finished ${prose ? dateWord(s.finishDate) : fmtLong(s.finishDate)}`;
+    const verb = s.finished ? "finished" : "abandoned";
+    t.textContent = `${s.title} — ${verb} ${prose ? dateWord(s.endDate) : fmtLong(s.endDate)}`;
     flag.appendChild(t);
     f.svg.appendChild(flag);
   }
@@ -225,13 +231,14 @@ export function renderCumulative(container, series, opts) {
         if (s.ended && best > lastDate) return { v: 0 };
         let v = 0;
         for (const p of s.points) { if (p.date <= best) v = p.v; else break; }
-        return { title: s.title, color: s.color, v, finishedHere: s.finishDate === best };
+        const endedHere = s.ended && s.endDate === best;
+        return { title: s.title, color: s.color, v, endNote: endedHere ? (s.finished ? "&nbsp;· finished" : "&nbsp;· abandoned") : "" };
       })
       .filter((r) => r.v > 0)
       .sort((a, b) => b.v - a.v)
       .map((r) => prose
-        ? `<span style="color:${r.color}">■</span> ${esc(r.title)} — ${totalWord(r.v)}${r.finishedHere ? "&nbsp;· finished" : ""}`
-        : `<span style="color:${r.color}">■</span> ${esc(r.title)} — <b>${Math.round(r.v)}</b>${r.finishedHere ? "&nbsp;· finished" : ""}`)
+        ? `<span style="color:${r.color}">■</span> ${esc(r.title)} — ${totalWord(r.v)}${r.endNote}`
+        : `<span style="color:${r.color}">■</span> ${esc(r.title)} — <b>${Math.round(r.v)}</b>${r.endNote}`)
       .join("<br>");
     tooltipShow(container, `<span class="tt-date">${prose ? dateWord(best) : fmtLong(best)}</span>${rows || "—"}`, e.clientX, e.clientY);
   });
