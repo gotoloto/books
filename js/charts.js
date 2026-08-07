@@ -356,11 +356,11 @@ export function renderDaily(container, days, opts) {
 // perDay: Map<date, {star, titles[]}> (pages* totals). Chessboard of the reading year.
 
 // Ramp anchored on brand tokens (eggshell-2 → --s1 → forest-deep), monotonic
-// lightness. Cells shade CONTINUOUSLY along it — each day gets its exact
-// color, saturating at HEAT_CAP (display calibration; tunable). A small floor
-// keeps even a one-page day visibly greener than an empty cell.
+// lightness. Cells shade CONTINUOUSLY along it, normalized so the darkest
+// green = the best recorded day in the active unit — the whole scale
+// re-anchors itself whenever a record falls. A small floor keeps even a
+// one-page day visibly greener than an empty cell. No legend by design.
 const HEAT_STOPS = ["#E4DCC3", "#B9C9A0", "#7FA860", "#3A7A33", "#22381F"];
-const HEAT_CAP = 50;
 
 function lerpHex(a, b, t) {
   const pa = parseInt(a.slice(1), 16);
@@ -369,9 +369,9 @@ function lerpHex(a, b, t) {
   return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
 }
 
-function heatColor(v) {
+function heatColor(v, cap) {
   if (v <= 0) return HEAT_STOPS[0];
-  const t = 0.15 + 0.85 * Math.min(v / HEAT_CAP, 1);
+  const t = 0.15 + 0.85 * Math.min(v / cap, 1);
   const seg = Math.min(3, Math.floor(t * 4));
   return lerpHex(HEAT_STOPS[seg], HEAT_STOPS[seg + 1], t * 4 - seg);
 }
@@ -410,6 +410,9 @@ export function renderHeatmap(container, perDay, opts) {
     svg.appendChild(t);
   }
 
+  let cap = 1; // best recorded day in the active unit anchors the darkest green
+  for (const info of perDay.values()) cap = Math.max(cap, info.v);
+
   const meta = [];
   for (let w = 0; w < weeks; w++) {
     const colMonday = addDays(start, w * 7);
@@ -419,7 +422,7 @@ export function renderHeatmap(container, perDay, opts) {
       const info = perDay.get(d);
       const v = info ? info.v : 0;
       const rect = el("rect", {
-        x: LEFT + w * PITCH, y: TOP + r * PITCH, width: CELL, height: CELL, fill: heatColor(v),
+        x: LEFT + w * PITCH, y: TOP + r * PITCH, width: CELL, height: CELL, fill: heatColor(v, cap),
       });
       if (v <= 0) {
         rect.setAttribute("stroke", "#C7B58F");
@@ -452,14 +455,6 @@ export function renderHeatmap(container, perDay, opts) {
   svg.addEventListener("mousemove", show);
   svg.addEventListener("click", show);
   svg.addEventListener("mouseleave", tooltipHide);
-
-  const legend = document.createElement("div");
-  legend.className = "heat-legend";
-  const bar = `<span class="heat-bar" style="background:linear-gradient(90deg,${HEAT_STOPS.join(",")})"></span>`;
-  legend.innerHTML = prose
-    ? `quiet ${bar} devoted`
-    : `0 ${bar} ${HEAT_CAP}+ ${unit}`;
-  container.appendChild(legend);
 
   // Open scrolled to today (the right edge) on narrow screens.
   scroll.scrollLeft = scroll.scrollWidth;

@@ -218,7 +218,9 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
   palette, so series distinctness now rides on the covers themselves; the PALETTE
   fallback (for colorless books) keeps its CVD-validated order — don't reorder it.
 - Stats definitions: week = Mon–Sun (records + heatmap columns); month = calendar
-  month; heatmap bins (1/15/30/50 pp*) are display-only and tunable in js/charts.js;
+  month; heatmap shades continuously with the darkest green pinned to the best
+  recorded day in the active unit (auto-re-anchors when records fall; legendless
+  by Travis's call, 2026-08-07 — js/charts.js `heatColor`);
   forecast & queue ETA = the **all-books universal pace in pages*/day**
   (typesetting-normalized, trailing 14 calendar days, shorter denominator until
   day 14, zeros included) applied to each book's remaining pages* — i.e., "done by
