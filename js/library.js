@@ -166,7 +166,17 @@ function spineShelf(books, state, mode) {
 }
 
 export function renderLibrary(state) {
-  const reading = state.books.filter((b) => b.status === "reading");
+  // Most recently fed book first: the append-only log makes the index of a
+  // book's last entry a perfect recency key (same-day sessions included).
+  const lastActivity = (b) => {
+    for (let i = state.entries.length - 1; i >= 0; i--) {
+      if (state.entries[i].book === b.id) return i;
+    }
+    return -1; // just started, nothing logged yet
+  };
+  const reading = state.books
+    .filter((b) => b.status === "reading")
+    .sort((a, b) => lastActivity(b) - lastActivity(a));
   const finished = state.books
     .filter((b) => b.status === "finished")
     .sort((a, b) => (a.finishDate < b.finishDate ? 1 : -1));
