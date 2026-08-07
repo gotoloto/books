@@ -120,6 +120,12 @@ function relLum(hex) {
 const ratio = (a, b) => (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
 const INK_LUM = relLum("#1E2A1E"), EGG_LUM = relLum("#F0EAD6"); // CSS --ink / --eggshell
 
+// Shared by every painted spine (Library shelves + Queue preview).
+export function spineInk(color) {
+  const lum = relLum(color);
+  return ratio(lum, INK_LUM) >= ratio(lum, EGG_LUM) ? "var(--ink)" : "var(--eggshell)";
+}
+
 export function hashCode(s) {
   let h = 0;
   for (const c of s) h = (h * 31 + c.charCodeAt(0)) | 0;
@@ -146,8 +152,7 @@ function spineShelf(books, state, mode) {
         : pagesStar(b, state.gWpp) ?? b.totalPages ?? 320;
       const h = 150 + (hashCode(b.id) % 4) * 10;
       const color = bookColor(b, state);
-      const lum = relLum(color);
-      const ink = ratio(lum, INK_LUM) >= ratio(lum, EGG_LUM) ? "var(--ink)" : "var(--eggshell)";
+      const ink = spineInk(color);
       const when = b[dateKey] ? (isProse() ? dateWord(b[dateKey], state.today) : fmtLong(b[dateKey])) : "";
       const tip = mode === "dnf"
         ? (isProse()

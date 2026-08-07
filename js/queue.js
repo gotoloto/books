@@ -7,7 +7,7 @@
 // key did exactly that; bumping to v2 orphans every stale pinned snapshot.
 
 import { currentPosition, recentPaceDetail, starFactor } from "./derive.js";
-import { spineWidth, hashCode } from "./library.js";
+import { spineWidth, hashCode, spineInk } from "./library.js";
 import {
   isProse, cap, countBooksWord, dateWord, durationWord, lengthWord, ordinalWord, paceWord,
 } from "./prose.js";
@@ -16,8 +16,10 @@ import { fmtLong } from "./derive.js";
 const KEY = "books:queue-order:v2";
 try { localStorage.removeItem("books:queue-order:v1"); } catch { /* private mode */ }
 
-// Queue spines stay undyed (alternating tans) — a book earns its palette color
-// only when it starts. Same width/height rules as the Library shelves.
+// Queue spines wear their cover colors too (Travis's call, 2026-08-06 — colors
+// are precomputed for every book with a cover). Tans remain only as the
+// fallback for a book whose cover/color hasn't landed yet. Same width/height
+// rules as the Library shelves.
 const QUEUE_TANS = ["#A68A64", "#B79B72"];
 
 function esc(s) {
@@ -101,7 +103,9 @@ function renderShelf(order, byId, state) {
       const tip = isProse()
         ? `${b.title} — ${b.author}, ${lengthWord(star)}`
         : `${b.title} — ${b.author}${Number.isFinite(b.totalPages) ? `, ${verified(b) ? "" : "~"}${b.totalPages} pp` : ""}`;
-      return `<div class="spine" style="width:${spineWidth(star)}px;height:${h}px;background:${QUEUE_TANS[i % 2]};color:var(--ink)" title="${esc(tip)}"><span class="t">${esc(b.title)}</span></div>`;
+      const bg = b.color || QUEUE_TANS[i % 2];
+      const ink = b.color ? spineInk(b.color) : "var(--ink)";
+      return `<div class="spine" style="width:${spineWidth(star)}px;height:${h}px;background:${bg};color:${ink}" title="${esc(tip)}"><span class="t">${esc(b.title)}</span></div>`;
     })
     .join("");
   box.innerHTML = spines
