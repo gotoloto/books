@@ -364,7 +364,9 @@ export function renderHeatmap(container, perDay, opts) {
   const { today, prose, unit = "pp*" } = opts;
   container.innerHTML = "";
   const CELL = 13, PITCH = 16, LEFT = 34, TOP = 18;
-  const start = mondayOf(addDays(today, -364)); // Monday on/before one year ago
+  // Grid runs from Day 0's Monday to today, growing week by week — the record
+  // of the whole tracking era, not a trailing window.
+  const start = mondayOf(opts.start || addDays(today, -364));
   const weeks = Math.floor(diffDays(start, today) / 7) + 1;
   const width = LEFT + weeks * PITCH - 3 + 2;
   const height = TOP + 7 * PITCH - 3 + 2;
@@ -385,7 +387,7 @@ export function renderHeatmap(container, perDay, opts) {
       prevMonth = ym;
     }
   }
-  if (labelCols.length > 1 && labelCols[1] - labelCols[0] < 3) labelCols.shift();
+  if (labelCols.length > 1 && labelCols[1] - labelCols[0] < 2) labelCols.shift();
   for (const w of labelCols) {
     const t = el("text", { x: LEFT + w * PITCH, y: 11, "font-size": 11 });
     t.textContent = fmtMonth(addDays(start, w * 7));

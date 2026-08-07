@@ -361,6 +361,7 @@ export function renderStats(state) {
   renderRecords(state);
   renderHeatmap(document.getElementById("heatmap"), perDay, {
     today: effectiveToday(state.entries, state.today),
+    start: day0(state), // the grid begins at Day 0 and grows — no phantom empty year
     prose: isProse(),
     unit: unitStar() ? "pp*" : "pp",
   });

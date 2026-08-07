@@ -348,6 +348,7 @@ em.aside { color: var(--ink-soft); font-size: 15px; }
 .unit-switch { display: inline-flex; }
 .unit-switch .btn + .btn { border-left: none; }
 .unit-dock { display: flex; justify-content: center; margin: 30px 0 4px; }
+.unit-dock + .footnote { text-align: center; }
 
 /* ——— heatmap ——— */
 .heatmap { position: relative; margin-bottom: 8px; }
