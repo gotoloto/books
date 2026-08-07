@@ -355,10 +355,26 @@ export function renderDaily(container, days, opts) {
 // ——— Heatmap: trailing-year calendar, one cell per day ———
 // perDay: Map<date, {star, titles[]}> (pages* totals). Chessboard of the reading year.
 
-// Ramp anchored on brand tokens (eggshell-2 → --s1 → forest-deep), monotonic lightness.
-const HEAT_BINS = ["#E4DCC3", "#B9C9A0", "#7FA860", "#3A7A33", "#22381F"];
-const HEAT_LABELS = ["0", "1–14", "15–29", "30–49", "50+"];
-const heatBin = (v) => (v <= 0 ? 0 : v < 15 ? 1 : v < 30 ? 2 : v < 50 ? 3 : 4);
+// Ramp anchored on brand tokens (eggshell-2 → --s1 → forest-deep), monotonic
+// lightness. Cells shade CONTINUOUSLY along it — each day gets its exact
+// color, saturating at HEAT_CAP (display calibration; tunable). A small floor
+// keeps even a one-page day visibly greener than an empty cell.
+const HEAT_STOPS = ["#E4DCC3", "#B9C9A0", "#7FA860", "#3A7A33", "#22381F"];
+const HEAT_CAP = 50;
+
+function lerpHex(a, b, t) {
+  const pa = parseInt(a.slice(1), 16);
+  const pb = parseInt(b.slice(1), 16);
+  const ch = (sh) => Math.round(((pa >> sh) & 255) + (((pb >> sh) & 255) - ((pa >> sh) & 255)) * t);
+  return `rgb(${ch(16)},${ch(8)},${ch(0)})`;
+}
+
+function heatColor(v) {
+  if (v <= 0) return HEAT_STOPS[0];
+  const t = 0.15 + 0.85 * Math.min(v / HEAT_CAP, 1);
+  const seg = Math.min(3, Math.floor(t * 4));
+  return lerpHex(HEAT_STOPS[seg], HEAT_STOPS[seg + 1], t * 4 - seg);
+}
 
 export function renderHeatmap(container, perDay, opts) {
   const { today, prose, unit = "pp*" } = opts;
@@ -402,11 +418,10 @@ export function renderHeatmap(container, perDay, opts) {
       if (d > today) break;
       const info = perDay.get(d);
       const v = info ? info.v : 0;
-      const bin = heatBin(v);
       const rect = el("rect", {
-        x: LEFT + w * PITCH, y: TOP + r * PITCH, width: CELL, height: CELL, fill: HEAT_BINS[bin],
+        x: LEFT + w * PITCH, y: TOP + r * PITCH, width: CELL, height: CELL, fill: heatColor(v),
       });
-      if (bin === 0) {
+      if (v <= 0) {
         rect.setAttribute("stroke", "#C7B58F");
         rect.setAttribute("stroke-width", 1);
       } else {
@@ -440,15 +455,10 @@ export function renderHeatmap(container, perDay, opts) {
 
   const legend = document.createElement("div");
   legend.className = "heat-legend";
+  const bar = `<span class="heat-bar" style="background:linear-gradient(90deg,${HEAT_STOPS.join(",")})"></span>`;
   legend.innerHTML = prose
-    ? "quiet " +
-      HEAT_BINS.map((c, i) =>
-        `<span class="cell" style="background:${c}${i === 0 ? ";border:1px solid #C7B58F" : ""}"></span>`
-      ).join("") +
-      " devoted"
-    : HEAT_BINS.map((c, i) =>
-        `<span class="cell" style="background:${c}${i === 0 ? ";border:1px solid #C7B58F" : ""}"></span>${HEAT_LABELS[i]}`
-      ).join(" ") + ` ${unit}`;
+    ? `quiet ${bar} devoted`
+    : `0 ${bar} ${HEAT_CAP}+ ${unit}`;
   container.appendChild(legend);
 
   // Open scrolled to today (the right edge) on narrow screens.
