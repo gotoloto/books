@@ -22,9 +22,9 @@
       "wordsPerPage": 301,
       "cover": "covers/remainder.jpg",
       "color": "#2CCBC2",
-      "status": "planned",
-      "startPage": null,
-      "startDate": null,
+      "status": "reading",
+      "startPage": 0,
+      "startDate": "2026-08-06",
       "finishDate": null
     },
     {
