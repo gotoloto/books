@@ -160,10 +160,16 @@ export function renderCumulative(container, series, opts) {
     const anchor = dayBefore > winStart ? dayBefore : winStart;
     const pts = [{ date: anchor, v: 0 }, ...s.points];
     const last = pts[pts.length - 1];
-    if (last.date < drawEnd) pts.push({ date: drawEnd, v: last.v }); // flat to "now"
+    // A book that ended (finished/DNF) inside the view stops at flag day with a
+    // straight drop to the baseline; only living books extend flat to "now".
+    const endedInView = s.ended && s.endDate && s.endDate <= winEnd;
+    if (!endedInView && last.date < drawEnd) pts.push({ date: drawEnd, v: last.v });
 
-    const line = pts.map((p, i) => `${i ? "L" : "M"}${f.x(p.date).toFixed(1)},${f.y(p.v).toFixed(1)}`).join("");
-    const area = `${line}L${f.x(pts[pts.length - 1].date).toFixed(1)},${f.y(0).toFixed(1)}L${f.x(winStart).toFixed(1)},${f.y(0).toFixed(1)}Z`;
+    const base = pts.map((p, i) => `${i ? "L" : "M"}${f.x(p.date).toFixed(1)},${f.y(p.v).toFixed(1)}`).join("");
+    const lastX = f.x(pts[pts.length - 1].date).toFixed(1);
+    const y0 = f.y(0).toFixed(1);
+    const line = endedInView ? `${base}L${lastX},${y0}` : base;
+    const area = `${base}L${lastX},${y0}L${f.x(winStart).toFixed(1)},${y0}Z`;
 
     const g = el("g");
     g.appendChild(el("path", { d: area, fill: s.color, "fill-opacity": 0.18, stroke: "none" }));
@@ -214,6 +220,9 @@ export function renderCumulative(container, series, opts) {
     cross.setAttribute("visibility", "visible");
     const rows = series
       .map((s) => {
+        // An ended book leaves the tooltip after its last reading day.
+        const lastDate = s.points[s.points.length - 1].date;
+        if (s.ended && best > lastDate) return { v: 0 };
         let v = 0;
         for (const p of s.points) { if (p.date <= best) v = p.v; else break; }
         return { title: s.title, color: s.color, v, finishedHere: s.finishDate === best };

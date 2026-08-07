@@ -220,6 +220,9 @@ function renderCharts(state) {
       final: points[points.length - 1].v,
       finished: b.status === "finished",
       finishDate: b.finishDate || null,
+      // A dead book (finished or DNF) ends on the chart — no eternal plateau.
+      ended: b.status === "finished" || b.status === "dnf",
+      endDate: b.finishDate || b.dnfDate || null,
     });
   }
   // Big books painted first (behind); small books stay visible on top.
