@@ -26,6 +26,7 @@
     { "date": "2026-08-06", "book": "remainder", "from": 9, "to": 19 },
     { "date": "2026-08-07", "book": "remainder", "from": 19, "to": 104 },
     { "date": "2026-08-07", "book": "remainder", "from": 104, "to": 114 },
-    { "date": "2026-08-07", "book": "remainder", "from": 114, "to": 118 }
+    { "date": "2026-08-07", "book": "remainder", "from": 114, "to": 118 },
+    { "date": "2026-08-08", "book": "remainder", "from": 118, "to": 136 }
   ]
 }
