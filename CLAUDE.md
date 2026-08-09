@@ -97,8 +97,10 @@ book. A DNF book never has `finishDate` (and gets no chart pennant).
 Un-DNF (he picks it back up): `status: "reading"`, delete `dnfDate`; logging resumes
 from the last position as usual.
 
-Spine widths on both shelves come from `spineWidth()` in js/library.js: 34px for a
-300-pp* book, ±1px per 20 pp*, clamped 18–88.
+Spine widths on both shelves come from `spineWidth()` in js/library.js: linear in
+pages* through zero (star × 34/300 — 300 pp* keeps its 34px), NO min/max clamps —
+widths stay honest to word count (Travis, 2026-08-08). Label font shrinks with the
+spine via `spineFont()`, legibility be damned; tooltips carry the title.
 
 ## Starting a new book
 

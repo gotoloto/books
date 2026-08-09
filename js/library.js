@@ -132,11 +132,19 @@ export function hashCode(s) {
   return Math.abs(h);
 }
 
-// Anchor: a 300-pp* book is an average 34px spine, ±1px per 20 pp*.
-// Slivers clamp at 18px (early DNFs), doorstops at 88px.
+// Width is LINEAR in pages* through zero — ∝ total word count, no floor, no
+// cap (Travis's call, 2026-08-08: footprints honest to word count; legibility
+// yields). 300 pp* keeps the familiar 34px; a doorstop earns its whole slab,
+// a novella its sliver. The 1px min is render sanity, not a legibility floor.
 // Exported with hashCode for the queue's shelf preview (same shelf rules).
 export function spineWidth(star) {
-  return Math.max(18, Math.min(88, Math.round(34 + 0.05 * (star - 300))));
+  return Math.max(1, Math.round(star * (34 / 300)));
+}
+
+// Label size follows the spine down: whatever fits between the borders,
+// however small — tooltips carry the full title when the type gives out.
+export function spineFont(width) {
+  return Math.max(3, Math.min(13, width - 7));
 }
 
 // One shelf for both fates. mode "finished": width = the whole book (total pages*).
@@ -159,7 +167,8 @@ function spineShelf(books, state, mode) {
             ? `${b.title} — ${b.author}, abandoned (${Number.isFinite(b.totalPages) ? fractionWord(pos / b.totalPages) : "partway"})${when ? ", " + when : ""}`
             : `${b.title} — ${b.author}, DNF at p. ${pos} of ${b.totalPages ?? "?"}${when ? ", " + when : ""}`)
         : `${b.title} — ${b.author}${when ? ", finished " + when : ""}`;
-      return `<div class="spine" style="width:${spineWidth(star)}px;height:${h}px;background:${color};color:${ink}" title="${esc(tip)}"><span class="t">${esc(b.title)}</span></div>`;
+      const w = spineWidth(star);
+      return `<div class="spine" style="width:${w}px;height:${h}px;background:${color};color:${ink}" title="${esc(tip)}"><span class="t" style="font-size:${spineFont(w)}px">${esc(b.title)}</span></div>`;
     })
     .join("");
   return `<div class="spine-shelf"><div class="spine-inner"><div class="spine-row">${spines}</div><div class="shelf-board"></div></div></div>`;
