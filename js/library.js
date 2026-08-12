@@ -152,7 +152,7 @@ export function spineFont(width) {
 function spineShelf(books, state, mode) {
   const dateKey = mode === "dnf" ? "dnfDate" : "finishDate";
   const spines = [...books]
-    .sort((a, b) => ((a[dateKey] || "") < (b[dateKey] || "") ? -1 : 1)) // shelf fills left → right
+    .sort((a, b) => ((a[dateKey] || "") > (b[dateKey] || "") ? -1 : 1)) // newest finish takes slot 1 (leftmost), matching the cover grid
     .map((b) => {
       const pos = currentPosition(b, state.entries);
       const star = mode === "dnf"
