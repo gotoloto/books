@@ -22,10 +22,10 @@
       "wordsPerPage": 301,
       "cover": "covers/remainder.jpg",
       "color": "#2CCBC2",
-      "status": "reading",
+      "status": "finished",
       "startPage": 0,
       "startDate": "2026-08-06",
-      "finishDate": null
+      "finishDate": "2026-08-11"
     },
     {
       "id": "notes-from-underground",
