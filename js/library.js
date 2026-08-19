@@ -132,6 +132,12 @@ export function hashCode(s) {
   return Math.abs(h);
 }
 
+// Deterministic organic height jitter, 140–200px near-continuous (61 steps) —
+// four buckets looked mass-produced once the shelves filled up.
+export function spineHeight(id) {
+  return 140 + (hashCode(id) % 61);
+}
+
 // Width is LINEAR in pages* through zero — ∝ total word count, no floor, no
 // cap (Travis's call, 2026-08-08: footprints honest to word count; legibility
 // yields). 300 pp* keeps the familiar 34px; a doorstop earns its whole slab,
@@ -158,7 +164,7 @@ function spineShelf(books, state, mode) {
       const star = mode === "dnf"
         ? Math.round(pos * starFactor(b, state.gWpp))
         : pagesStar(b, state.gWpp) ?? b.totalPages ?? 320;
-      const h = 150 + (hashCode(b.id) % 4) * 10;
+      const h = spineHeight(b.id);
       const color = bookColor(b, state);
       const ink = spineInk(color);
       const when = b[dateKey] ? (isProse() ? dateWord(b[dateKey], state.today) : fmtLong(b[dateKey])) : "";

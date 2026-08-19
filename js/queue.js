@@ -7,7 +7,7 @@
 // key did exactly that; bumping to v2 orphans every stale pinned snapshot.
 
 import { currentPosition, recentPaceDetail, starFactor } from "./derive.js";
-import { spineWidth, spineFont, hashCode, spineInk } from "./library.js";
+import { spineWidth, spineFont, spineHeight, spineInk } from "./library.js";
 import {
   isProse, cap, countBooksWord, dateWord, durationWord, lengthWord, ordinalWord, paceWord,
 } from "./prose.js";
@@ -99,7 +99,7 @@ function renderShelf(order, byId, state) {
       const star = Number.isFinite(b.totalPages)
         ? Math.round(b.totalPages * starFactor(b, state.gWpp))
         : 300;
-      const h = 150 + (hashCode(b.id) % 4) * 10;
+      const h = spineHeight(b.id);
       const tip = isProse()
         ? `${b.title} — ${b.author}, ${lengthWord(star)}`
         : `${b.title} — ${b.author}${Number.isFinite(b.totalPages) ? `, ${verified(b) ? "" : "~"}${b.totalPages} pp` : ""}`;
