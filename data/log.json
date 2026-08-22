@@ -42,6 +42,7 @@
     { "date": "2026-08-17", "book": "notes-from-underground", "from": 70, "to": 72 },
     { "date": "2026-08-18", "book": "notes-from-underground", "from": 72, "to": 94 },
     { "date": "2026-08-19", "book": "notes-from-underground", "from": 94, "to": 100 },
-    { "date": "2026-08-20", "book": "notes-from-underground", "from": 100, "to": 122 }
+    { "date": "2026-08-20", "book": "notes-from-underground", "from": 100, "to": 122 },
+    { "date": "2026-08-21", "book": "notes-from-underground", "from": 122, "to": 132 }
   ]
 }

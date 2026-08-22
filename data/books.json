@@ -35,10 +35,10 @@
       "wordsPerPage": 355,
       "cover": "covers/notes-from-underground.jpg",
       "color": "#535250",
-      "status": "reading",
+      "status": "finished",
       "startPage": 0,
       "startDate": "2026-08-11",
-      "finishDate": null
+      "finishDate": "2026-08-21"
     },
     {
       "id": "trash",
