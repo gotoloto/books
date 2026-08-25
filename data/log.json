@@ -46,6 +46,7 @@
     { "date": "2026-08-21", "book": "notes-from-underground", "from": 122, "to": 132 },
     { "date": "2026-08-21", "book": "king-in-yellow", "from": 0, "to": 15 },
     { "date": "2026-08-22", "book": "king-in-yellow", "from": 15, "to": 52 },
-    { "date": "2026-08-23", "book": "king-in-yellow", "from": 52, "to": 102 }
+    { "date": "2026-08-23", "book": "king-in-yellow", "from": 52, "to": 102 },
+    { "date": "2026-08-24", "book": "king-in-yellow", "from": 102, "to": 132 }
   ]
 }
