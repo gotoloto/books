@@ -48,6 +48,7 @@
     { "date": "2026-08-22", "book": "king-in-yellow", "from": 15, "to": 52 },
     { "date": "2026-08-23", "book": "king-in-yellow", "from": 52, "to": 102 },
     { "date": "2026-08-24", "book": "king-in-yellow", "from": 102, "to": 132 },
-    { "date": "2026-08-25", "book": "king-in-yellow", "from": 132, "to": 154 }
+    { "date": "2026-08-25", "book": "king-in-yellow", "from": 132, "to": 154 },
+    { "date": "2026-08-25", "book": "2666", "from": 637, "to": 638 }
   ]
 }
