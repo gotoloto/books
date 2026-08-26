@@ -61,10 +61,10 @@
       "wordsPerPage": 213,
       "cover": "covers/king-in-yellow.jpg",
       "color": "#B7BF29",
-      "status": "reading",
+      "status": "finished",
       "startPage": 0,
       "startDate": "2026-08-21",
-      "finishDate": null
+      "finishDate": "2026-08-25"
     },
     {
       "id": "down-time",
