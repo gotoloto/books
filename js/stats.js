@@ -17,7 +17,7 @@ const PRESET_LABELS = {
 };
 const DAY0 = "2026-07-26";
 
-const ui = { preset: "1m", unit: "star", customStart: null, customEnd: null, built: false };
+const ui = { preset: "all", unit: "star", customStart: null, customEnd: null, built: false };
 
 // Window-independent per-day rollup in the ACTIVE unit; refreshed on each
 // stats render. The pages/pages* toggle governs the whole stats page; prose
