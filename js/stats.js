@@ -1,10 +1,10 @@
 import {
   addDays, cumulativeSeries, dailyPoints, diffDays, effectiveToday,
-  fmtLong, fmtMonthYear, fmtShort, perDayTotals, records, starFactor,
+  fmtLong, fmtShort, perDayTotals, records, starFactor,
 } from "./derive.js";
 import { renderCumulative, renderDaily, renderHeatmap } from "./charts.js";
 import {
-  isProse, cap, dateWord, monthName, sessionWord, streakWord, totalWord, weekWord, monthWord,
+  isProse, cap, dateWord, sessionWord, streakWord, totalWord,
 } from "./prose.js";
 
 // Validated series palette — fixed assignment order, never shuffled.
@@ -144,20 +144,11 @@ function renderRecords(state) {
         val: r.bestDay ? cap(sessionWord(r.bestDay.value)) : "Nothing yet",
         lbl: r.bestDay ? `best day · ${dateWord(r.bestDay.date, t)}` : "best day",
       },
-      {
-        val: r.bestWeek ? cap(weekWord(r.bestWeek.value)) : "Nothing yet",
-        lbl: r.bestWeek ? `best week · ${dateWord(r.bestWeek.start, t)}` : "best week",
-      },
-      {
-        val: r.bestMonth ? cap(monthWord(r.bestMonth.value)) : "Nothing yet",
-        lbl: r.bestMonth ? `best month · ${monthName(r.bestMonth.ym, t)}` : "best month",
-      },
+      { val: cap(totalWord(r.total)), lbl: "since the beginning" },
       {
         val: r.longestStreak ? cap(streakWord(r.longestStreak.len)) : "Nothing yet",
         lbl: r.longestStreak ? `longest streak · around ${dateWord(r.longestStreak.start, t)}` : "longest streak",
       },
-      { val: cap(streakWord(r.streak)), lbl: "current streak" },
-      { val: cap(totalWord(r.total)), lbl: "since the beginning" },
     ];
     document.getElementById("records").innerHTML = tiles
       .map((x) => `<div class="tile"><div class="checker" aria-hidden="true"></div><div class="val">${x.val}</div><div class="lbl">${x.lbl}</div></div>`)
@@ -171,26 +162,14 @@ function renderRecords(state) {
       lbl: r.bestDay ? `best day · ${fmtShort(r.bestDay.date)}` : "best day",
     },
     {
-      val: r.bestWeek ? `${Math.round(r.bestWeek.value)} <small>${U}</small>` : "—",
-      lbl: r.bestWeek ? `best week · wk of ${fmtShort(r.bestWeek.start)}` : "best week",
-    },
-    {
-      val: r.bestMonth ? `${Math.round(r.bestMonth.value)} <small>${U}</small>` : "—",
-      lbl: r.bestMonth ? `best month · ${fmtMonthYear(r.bestMonth.ym + "-01")}` : "best month",
+      val: `${Math.round(r.total)} <small>${U}</small>`,
+      lbl: `since day 0 · ${r.daysRead} ${r.daysRead === 1 ? "day" : "days"} read`,
     },
     {
       val: r.longestStreak ? days(r.longestStreak.len) : "—",
       lbl: r.longestStreak
         ? `longest streak · ${fmtShort(r.longestStreak.start)}–${fmtShort(r.longestStreak.end)}`
         : "longest streak",
-    },
-    {
-      val: days(r.streak),
-      lbl: "current streak",
-    },
-    {
-      val: `${Math.round(r.total)} <small>${U}</small>`,
-      lbl: `since day 0 · ${r.daysRead} ${r.daysRead === 1 ? "day" : "days"} read`,
     },
   ];
   document.getElementById("records").innerHTML = tiles
