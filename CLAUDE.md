@@ -63,6 +63,11 @@ When Travis reports reading (any phrasing like "Book X — read pages A–B"):
 If the entry lands them on the last page (`to == totalPages`), congratulate them and
 also do the "finishing a book" steps.
 
+**The Hall of Fame shows only three tiles — best day, total since day 0, longest
+streak** (current-streak, best-week, and best-month tiles removed 2026-08-29 at
+Travis's request; `records()` still computes everything). Only announce records
+for the three surfaced tiles.
+
 **Announcing records ("new best day!"): recompute from the data first** — run
 `records()` (js/derive.js) against the current log, never trust the conversation's
 memory of what the record was. Records can change hands *between* logging events
