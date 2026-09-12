@@ -2,7 +2,7 @@
 // full re-render on every change — the data is tiny.
 
 import { addDays, diffDays, fmtShort, fmtMonth, fmtMonthYear, fmtLong, fromUTCms, mondayOf } from "./derive.js";
-import { dateWord, sessionWord, totalWord } from "./prose.js";
+import { cap, dateWord, sessionWord, totalWord } from "./prose.js";
 
 const NS = "http://www.w3.org/2000/svg";
 
@@ -138,6 +138,30 @@ function frame(container, height, winStart, winEnd, maxVal, unitLabel, prose) {
   return { svg, width, height, x, y, top, innerW, innerH };
 }
 
+// Crosshair + tooltip shared by the cumulative charts: snaps to the nearest
+// date carrying a data point (within 60px), hides beyond that. body(date)
+// returns the tooltip rows rendered under the date line.
+function attachCrosshair(f, container, hoverDates, prose, body) {
+  const cross = el("line", { y1: M.top, y2: f.height - M.bottom, stroke: "#4A523F", "stroke-width": 1, "stroke-dasharray": "3,3", visibility: "hidden" });
+  f.svg.appendChild(cross);
+  const hide = () => { cross.setAttribute("visibility", "hidden"); tooltipHide(); };
+  f.svg.addEventListener("mousemove", (e) => {
+    if (!hoverDates.length) return;
+    const px = e.clientX - f.svg.getBoundingClientRect().left;
+    let best = hoverDates[0], bd = Infinity;
+    for (const d of hoverDates) {
+      const dd = Math.abs(f.x(d) - px);
+      if (dd < bd) { bd = dd; best = d; }
+    }
+    if (bd > 60) { hide(); return; }
+    const xx = f.x(best).toFixed(1);
+    cross.setAttribute("x1", xx); cross.setAttribute("x2", xx);
+    cross.setAttribute("visibility", "visible");
+    tooltipShow(container, `<span class="tt-date">${prose ? dateWord(best) : fmtLong(best)}</span>${body(best) || "—"}`, e.clientX, e.clientY);
+  });
+  f.svg.addEventListener("mouseleave", hide);
+}
+
 // ——— Chart A: layered cumulative areas ———
 // series: [{title, color, points:[{date, v}], final}] ALREADY sorted final-desc
 // (largest painted first, so smaller books land on top and stay visible).
@@ -206,25 +230,9 @@ export function renderCumulative(container, series, opts) {
     f.svg.appendChild(flag);
   }
 
-  // hover: crosshair snapped to the nearest date carrying any data point
+  // hover: one row per living book at the snapped date
   const hoverDates = [...new Set(series.flatMap((s) => s.points.map((p) => p.date)))].sort();
-  const cross = el("line", { y1: M.top, y2: f.height - M.bottom, stroke: "#4A523F", "stroke-width": 1, "stroke-dasharray": "3,3", visibility: "hidden" });
-  f.svg.appendChild(cross);
-
-  f.svg.addEventListener("mousemove", (e) => {
-    if (!hoverDates.length) return;
-    const rect = f.svg.getBoundingClientRect();
-    const px = e.clientX - rect.left;
-    let best = hoverDates[0], bd = Infinity;
-    for (const d of hoverDates) {
-      const dd = Math.abs(f.x(d) - px);
-      if (dd < bd) { bd = dd; best = d; }
-    }
-    if (bd > 60) { cross.setAttribute("visibility", "hidden"); tooltipHide(); return; }
-    const xx = f.x(best).toFixed(1);
-    cross.setAttribute("x1", xx); cross.setAttribute("x2", xx);
-    cross.setAttribute("visibility", "visible");
-    const rows = series
+  attachCrosshair(f, container, hoverDates, prose, (best) => series
       .map((s) => {
         // An ended book leaves the tooltip after its last reading day.
         const lastDate = s.points[s.points.length - 1].date;
@@ -239,10 +247,40 @@ export function renderCumulative(container, series, opts) {
       .map((r) => prose
         ? `<span style="color:${r.color}">■</span> ${esc(r.title)} — ${totalWord(r.v)}${r.endNote}`
         : `<span style="color:${r.color}">■</span> ${esc(r.title)} — <b>${Math.round(r.v)}</b>${r.endNote}`)
-      .join("<br>");
-    tooltipShow(container, `<span class="tt-date">${prose ? dateWord(best) : fmtLong(best)}</span>${rows || "—"}`, e.clientX, e.clientY);
+      .join("<br>"));
+}
+
+// ——— Chart C: one line, every book summed ———
+// points: [{date, v}] running total within the window, ascending — the sum of
+// the by-book areas above it at every date (window-relative like them, so the
+// two charts always agree on hover). The plateau extends to `today`.
+
+export function renderCumulativeTotal(container, points, opts) {
+  const { winStart, winEnd, today, unitLabel, prose, color } = opts;
+  if (!points.length) {
+    container.innerHTML = `<div class="chart-empty">No reading logged in this window.</div>`;
+    return;
+  }
+  const f = frame(container, 280, winStart, winEnd, points[points.length - 1].v, unitLabel, prose);
+  const drawEnd = winEnd < today ? winEnd : today;
+
+  // Same zero-anchor as the by-book areas: flat at 0 until the first counted day.
+  const dayBefore = addDays(points[0].date, -1);
+  const pts = [{ date: dayBefore > winStart ? dayBefore : winStart, v: 0 }, ...points];
+  const last = pts[pts.length - 1];
+  if (last.date < drawEnd) pts.push({ date: drawEnd, v: last.v });
+
+  const line = pts.map((p, i) => `${i ? "L" : "M"}${f.x(p.date).toFixed(1)},${f.y(p.v).toFixed(1)}`).join("");
+  const y0 = f.y(0).toFixed(1);
+  const area = `${line}L${f.x(pts[pts.length - 1].date).toFixed(1)},${y0}L${f.x(winStart).toFixed(1)},${y0}Z`;
+  f.svg.appendChild(el("path", { d: area, fill: color, "fill-opacity": 0.18, stroke: "none" }));
+  f.svg.appendChild(el("path", { d: line, fill: "none", stroke: color, "stroke-width": 2, "stroke-linejoin": "miter" }));
+
+  attachCrosshair(f, container, points.map((p) => p.date), prose, (best) => {
+    let v = 0;
+    for (const p of points) { if (p.date <= best) v = p.v; else break; }
+    return prose ? cap(totalWord(v)) : `<b>${Math.round(v)}</b> ${unitLabel}`;
   });
-  f.svg.addEventListener("mouseleave", () => { cross.setAttribute("visibility", "hidden"); tooltipHide(); });
 }
 
 // ——— Chart B: daily lollipops ———

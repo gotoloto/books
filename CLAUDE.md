@@ -201,7 +201,7 @@ js/library.js     reading cards + finished shelf
 js/queue.js       drag-drop ranking, localStorage `books:queue-order:v2` (drag-only writes)
 js/charts.js      hand-rolled SVG primitives + tooltip
 js/prose.js       prose-mode store + the number→word lexicon
-js/stats.js       records strip, cumulative chart, daily scatter, log table, PALETTE
+js/stats.js       records strip, cumulative charts (by book + total), daily scatter, log table, PALETTE
 data/books.json   one entry per book (see fields above)
 data/log.json     append-only reading log
 covers/*.jpg      local cover images, lowercase filenames
@@ -244,4 +244,8 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
   the pace; a truly skipped day still counts as zero afterward. The same rule
   governs display: chart windows, the cumulative plateau, and the heatmap all end
   at the last counted day — an unstarted today never appears as a zero on any chart.
+- "Cumulative, total" (chart-c, 2026-09-12) is the by-book areas summed — built
+  from the same per-day rollup and window-relative like them, so the two charts
+  agree at every hovered date; in ALL (the default) it is the running total since
+  Day 0. Single forest-green line, no legend.
 - Keep this file updated when workflows change.

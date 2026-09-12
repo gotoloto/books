@@ -2,7 +2,7 @@ import {
   addDays, cumulativeSeries, dailyPoints, diffDays, effectiveToday,
   fmtLong, fmtShort, perDayTotals, records, starFactor,
 } from "./derive.js";
-import { renderCumulative, renderDaily, renderHeatmap } from "./charts.js";
+import { renderCumulative, renderCumulativeTotal, renderDaily, renderHeatmap } from "./charts.js";
 import {
   isProse, cap, dateWord, sessionWord, streakWord, totalWord,
 } from "./prose.js";
@@ -213,9 +213,21 @@ function renderCharts(state) {
 
   // Pass effectiveToday as the plateau clamp so custom windows reaching past
   // the last counted day don't draw a flat line through an unstarted today.
+  const effEnd = effectiveToday(state.entries, state.today);
   renderCumulative(document.getElementById("chart-a"), series, {
-    winStart: ws, winEnd: we, today: effectiveToday(state.entries, state.today),
-    unitLabel, prose: isProse(),
+    winStart: ws, winEnd: we, today: effEnd, unitLabel, prose: isProse(),
+  });
+
+  // Every book summed: the running total within the window, in the active
+  // unit. Built from perDay (already unit-aware) so it is exactly the stack of
+  // the by-book areas above it — the two charts agree at every hovered date.
+  let run = 0;
+  const totalPts = [...perDay.keys()]
+    .filter((d) => d >= ws && d <= we)
+    .sort()
+    .map((d) => ({ date: d, v: (run += perDay.get(d).v) }));
+  renderCumulativeTotal(document.getElementById("chart-c"), totalPts, {
+    winStart: ws, winEnd: we, today: effEnd, unitLabel, prose: isProse(), color: "#2E4B2E",
   });
 
   // One lollipop per day: group the (book, day) cells into stacked segments,
@@ -247,7 +259,6 @@ function renderCharts(state) {
   // 7-day rolling mean of the daily totals in the ACTIVE unit (zeros count;
   // may look back before the window via the full perDay map). An unstarted
   // today stays out of the line (effectiveToday rule).
-  const effEnd = effectiveToday(state.entries, state.today);
   const paceEnd = we < effEnd ? we : effEnd;
   const pace = [];
   for (let d = ws; d <= paceEnd; d = addDays(d, 1)) {
