@@ -192,3 +192,14 @@ export function countBooksWord(n) {
     [20, "a generous shelf"],
   ], "a private library");
 }
+
+// share of a span's days that saw pages (the book page's "read on N of them")
+export function frequencyWord(r) {
+  return pick(r, [
+    [0.2, "now and then"],
+    [0.45, "every few days"],
+    [0.7, "more days than not"],
+    [0.9, "most days"],
+    [1, "nearly every day"],
+  ], "every single day");
+}

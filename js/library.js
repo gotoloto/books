@@ -15,7 +15,7 @@ export function pagesStar(book, gWpp) {
   return Math.round(book.totalPages * starFactor(book, gWpp));
 }
 
-function squareBar(pct, ariaLabel) {
+export function squareBar(pct, ariaLabel) {
   const filled = Math.floor((pct / 100) * SQUARES);
   const frac = (pct / 100) * SQUARES - filled;
   let html = '<div class="sq-bar" role="img" aria-label="' + esc(ariaLabel) + '">';
@@ -67,14 +67,15 @@ function readingCard(book, state) {
 
   return `
   <article class="reading-card">
-    <div class="cover"><img src="${esc(book.cover)}" alt="Cover of ${esc(book.title)}"></div>
+    <div class="cover"><a href="#book/${esc(book.id)}"><img src="${esc(book.cover)}" alt="Cover of ${esc(book.title)}"></a></div>
     <div class="body">
-      <h3 class="book-title">${esc(book.title)}</h3>
+      <h3 class="book-title"><a class="book-link" href="#book/${esc(book.id)}">${esc(book.title)}</a></h3>
       <p class="book-author">${esc(book.author)}</p>
       <p class="pos-line">${posLine}</p>
       ${squareBar(pct, isProse() ? frac : pct.toFixed(1) + "% read")}
       ${forecastLine(book, state)}
       <div class="fact-row">${facts}
+        <a class="jump" href="#book/${esc(book.id)}">journal →</a>
       </div>
     </div>
   </article>`;
@@ -85,9 +86,9 @@ function shelfSlot(book, state) {
   if (isProse()) {
     return `
   <div class="slot">
-    <div class="cover"><img src="${esc(book.cover)}" alt="Cover of ${esc(book.title)}" loading="lazy"></div>
+    <div class="cover"><a href="#book/${esc(book.id)}"><img src="${esc(book.cover)}" alt="Cover of ${esc(book.title)}" loading="lazy"></a></div>
     <div class="caption">
-      <b>${esc(book.title)}</b>
+      <b><a class="book-link" href="#book/${esc(book.id)}">${esc(book.title)}</a></b>
       <span class="muted">${esc(book.author)}</span><br>
       <span class="muted">${lengthWord(book.totalPages ?? 300)}</span><br>
       <span class="muted">${book.finishDate ? "finished " + dateWord(book.finishDate, state.today) : ""}</span>
@@ -97,9 +98,9 @@ function shelfSlot(book, state) {
   const fin = book.finishDate ? fmtLong(book.finishDate) : "";
   return `
   <div class="slot">
-    <div class="cover"><img src="${esc(book.cover)}" alt="Cover of ${esc(book.title)}" loading="lazy"></div>
+    <div class="cover"><a href="#book/${esc(book.id)}"><img src="${esc(book.cover)}" alt="Cover of ${esc(book.title)}" loading="lazy"></a></div>
     <div class="caption">
-      <b>${esc(book.title)}</b>
+      <b><a class="book-link" href="#book/${esc(book.id)}">${esc(book.title)}</a></b>
       <span class="muted">${esc(book.author)}</span><br>
       <span class="muted">${book.totalPages ?? "—"} pp · ${star ?? "—"} pp*</span><br>
       <span class="muted">${fin}</span>
@@ -174,7 +175,7 @@ function spineShelf(books, state, mode) {
             : `${b.title} — ${b.author}, DNF at p. ${pos} of ${b.totalPages ?? "?"}${when ? ", " + when : ""}`)
         : `${b.title} — ${b.author}${when ? ", finished " + when : ""}`;
       const w = spineWidth(star);
-      return `<div class="spine" style="width:${w}px;height:${h}px;background:${color};color:${ink}" title="${esc(tip)}"><span class="t" style="font-size:${spineFont(w)}px">${esc(b.title)}</span></div>`;
+      return `<a class="spine" href="#book/${esc(b.id)}" style="width:${w}px;height:${h}px;background:${color};color:${ink}" title="${esc(tip)}"><span class="t" style="font-size:${spineFont(w)}px">${esc(b.title)}</span></a>`;
     })
     .join("");
   return `<div class="spine-shelf"><div class="spine-inner"><div class="spine-row">${spines}</div><div class="shelf-board"></div></div></div>`;

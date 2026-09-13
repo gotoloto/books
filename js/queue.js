@@ -106,7 +106,7 @@ function renderShelf(order, byId, state) {
       const bg = b.color || QUEUE_TANS[i % 2];
       const ink = b.color ? spineInk(b.color) : "var(--ink)";
       const w = spineWidth(star);
-      return `<div class="spine" style="width:${w}px;height:${h}px;background:${bg};color:${ink}" title="${esc(tip)}"><span class="t" style="font-size:${spineFont(w)}px">${esc(b.title)}</span></div>`;
+      return `<a class="spine" href="#book/${esc(b.id)}" style="width:${w}px;height:${h}px;background:${bg};color:${ink}" title="${esc(tip)}"><span class="t" style="font-size:${spineFont(w)}px">${esc(b.title)}</span></a>`;
     })
     .join("");
   box.innerHTML = spines

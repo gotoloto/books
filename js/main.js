@@ -2,9 +2,11 @@ import { buildDaily, globalWpp, todayISO } from "./derive.js";
 import { renderLibrary } from "./library.js";
 import { renderQueue } from "./queue.js";
 import { renderStats } from "./stats.js";
+import { renderBook } from "./book.js";
 import { isProse, toggleProse } from "./prose.js";
 
-const VIEWS = ["library", "queue", "stats"];
+const TABS = ["library", "queue", "stats"];
+const VIEWS = [...TABS, "book"];
 const state = {};
 
 function showBanner(html) {
@@ -13,19 +15,29 @@ function showBanner(html) {
   el.hidden = false;
 }
 
+// "#book/<id>" is a page, not a tab: no tab lights up; the crumb leads back.
 function currentView() {
   const h = location.hash.replace("#", "");
-  return VIEWS.includes(h) ? h : "library";
+  if (h.startsWith("book/")) return "book";
+  return TABS.includes(h) ? h : "library";
 }
 
+function bookId() {
+  return decodeURIComponent(location.hash.replace(/^#book\//, ""));
+}
+
+let lastHash = null;
 function route() {
   const view = currentView();
-  for (const v of VIEWS) {
-    document.getElementById(`view-${v}`).hidden = v !== view;
-    document.getElementById(`tab-${v}`).setAttribute("aria-selected", String(v === view));
-  }
+  for (const v of VIEWS) document.getElementById(`view-${v}`).hidden = v !== view;
+  for (const t of TABS) document.getElementById(`tab-${t}`).setAttribute("aria-selected", String(t === view));
+  // A new destination starts at the top (a hash with no matching id never scrolls on its own).
+  if (lastHash !== null && location.hash !== lastHash) window.scrollTo(0, 0);
+  lastHash = location.hash;
+  if (!state.ready) return;
   // Charts measure their container — only render while visible.
-  if (view === "stats" && state.ready) renderStats(state);
+  if (view === "stats") renderStats(state);
+  if (view === "book") renderBook(state, bookId());
 }
 
 async function boot() {
@@ -76,6 +88,7 @@ async function boot() {
       renderLibrary(state);
       renderQueue(state);
       if (currentView() === "stats") renderStats(state);
+      if (currentView() === "book") renderBook(state, bookId());
     }
   });
 

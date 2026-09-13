@@ -54,6 +54,8 @@ When Travis reports reading (any phrasing like "Book X — read pages A–B"):
      (append-only, unless the user corrects a mistake).
    - **Keep each entry on one line** (`{ "date": …, "book": …, "from": …, "to": … }`)
      so every log commit is a one-line diff. Don't let a JSON formatter explode them.
+   - **If the report says what he read** (a summary, a reaction, a question), it
+     goes into `notes/<book-id>.md` — see "Reading notes" below. His words, verbatim.
 4. Validate both files parse: `python3 -c "import json; json.load(open('data/books.json')); json.load(open('data/log.json'))"`
 5. Commit + push (Travis pre-authorized auto-push for log updates):
    `git add data/ && git commit -m "log: 2666 pp. 410–455" && git push`
@@ -81,6 +83,34 @@ Claude mobile app)** pointed at the `gotoloto/books` GitHub repo. Those sessions
 this file and follow the exact same recipe — nothing else is configured, and nothing
 else should be built (he explicitly declined GitHub Actions / Shortcuts automation).
 The only consequence for local sessions is step 0 above: always pull first.
+
+## Reading notes (the journal)
+
+Travis often adds a few sentences about what he read ("Yesterday in 2666 was
+about…"). Those live in **`notes/<book-id>.md`**, one file per book, and render on
+the book's page — `#book/<id>`, reached from any cover, title, or spine on the
+Library and Queue tabs (js/book.js).
+
+- One section per reading day: a `## YYYY-MM-DD · pp. A–B` heading (the date is
+  the only thing the site parses; the range is for people reading the file on
+  GitHub — use the day's merged range), a blank line, then the note. Append at
+  the end of the file, chronological like the log; the site shows newest first.
+- **His words, verbatim.** Never edit, tighten, correct, or "improve" a note —
+  not spelling, not phrasing, not a "Yesterday" sitting under a dated heading.
+  Fix a typo only when he asks. The journal is his voice; only the structure
+  is ours. (Agreed 2026-09-13.)
+- Same commit as the day's log entry (`log: 2666 pp. 842–880` covers both). A
+  note on a day with no log entry is fine — the heading just carries the date
+  and the page shows no range for it.
+- The renderer understands paragraphs, `> ` quotes (for lines worth keeping),
+  `*em*` and `**strong**`. Nothing else renders — keep the files plain.
+- The book page shows each note under the day's range and count **from the
+  log**, never from the heading. In prose mode the headings turn into words
+  like everything else; the note text itself is already prose.
+- The repo and site are public and Travis is fine with that — notes may carry
+  spoilers, and they are not veiled.
+- Never write a note on his behalf. If a report has pages but no summary, log
+  the pages and leave the journal alone.
 
 ## Finishing a book
 
@@ -202,8 +232,10 @@ js/queue.js       drag-drop ranking, localStorage `books:queue-order:v2` (drag-o
 js/charts.js      hand-rolled SVG primitives + tooltip
 js/prose.js       prose-mode store + the number→word lexicon
 js/stats.js       records strip, cumulative charts (by book + total), daily scatter, log table, PALETTE
+js/book.js        per-book page (#book/<id>): hero, how the reading went, the journal
 data/books.json   one entry per book (see fields above)
 data/log.json     append-only reading log
+notes/<id>.md     reading journal, one file per book — Travis's words, verbatim
 covers/*.jpg      local cover images, lowercase filenames
 manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
                   checkerboard icon; deliberately NO service worker — data must
