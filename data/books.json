@@ -15,6 +15,19 @@
       "finishDate": "2026-09-13"
     },
     {
+      "id": "disappearers",
+      "title": "The Disappearers",
+      "author": "Marlon James",
+      "totalPages": 613,
+      "wordsPerPage": 385,
+      "cover": "covers/disappearers.jpg",
+      "color": "#B88012",
+      "status": "reading",
+      "startPage": 0,
+      "startDate": "2026-09-13",
+      "finishDate": null
+    },
+    {
       "id": "remainder",
       "title": "Remainder",
       "author": "Tom McCarthy",
