@@ -1,6 +1,6 @@
-// Per-book page ("#book/<id>"): the cover and facts, how the reading went, and
-// the journal — Travis's own words from notes/<id>.md, stored verbatim and
-// shown newest-first like the log table. Every number here is derived from the
+// Per-book page ("#book/<id>"): the cover and facts, how the reading went, the
+// journal — Travis's own words from notes/<id>.md, stored verbatim and shown
+// newest-first like the log table — and the vocabulary he collected on the way. Every number here is derived from the
 // log at render time; a note heading's page range is for people reading the
 // file on GitHub and is never trusted by the renderer.
 
@@ -19,9 +19,11 @@ function esc(s) {
 }
 
 // ——— notes: a deliberately tiny Markdown subset ———
-// A section opens with "## YYYY-MM-DD" (the rest of that line is a label for
-// humans). Inside: blank-line paragraphs, "> " quotes, *em*, **strong**.
-// The journal is prose, not a document format — nothing else renders.
+// A dated section opens with "## YYYY-MM-DD" (the rest of that line is a label
+// for humans). Inside: blank-line paragraphs, "> " quotes, *em*, **strong**.
+// A "## Vocabulary" section holds one bullet per word, exactly as Travis gives
+// them: `* Term, pp 892. "The sentence it lives in."` Any other heading is
+// ignored. The journal is prose, not a document format — nothing else renders.
 function inline(text) {
   return esc(text)
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -53,21 +55,40 @@ function blocks(lines) {
   return out.join("");
 }
 
+const VOCAB_LINE = /^\*\s+(.+?),\s*pp?\.?\s*(\d+)\.?\s*(.*)$/;
+
 export function parseNotes(md) {
   const sections = [];
+  const vocab = [];
+  let mode = null; // "entry" | "vocab" | null (anything under an unknown heading)
   let cur = null;
   for (const line of md.split(/\r?\n/)) {
-    const m = line.match(/^##\s+(\d{4}-\d{2}-\d{2})\b/);
-    if (m) {
-      cur = { date: m[1], lines: [] };
-      sections.push(cur);
-    } else if (cur) {
+    const h = line.match(/^##\s+(.*)$/);
+    if (h) {
+      const d = h[1].match(/^(\d{4}-\d{2}-\d{2})\b/);
+      if (d) {
+        cur = { date: d[1], lines: [] };
+        sections.push(cur);
+        mode = "entry";
+      } else {
+        cur = null;
+        mode = /^vocabulary\b/i.test(h[1]) ? "vocab" : null;
+      }
+      continue;
+    }
+    if (mode === "entry") {
       cur.lines.push(line);
+    } else if (mode === "vocab") {
+      const m = line.match(VOCAB_LINE);
+      if (m) vocab.push({ term: m[1].trim(), page: Number(m[2]), quote: m[3].trim() });
     }
   }
-  return sections
-    .map((s) => ({ date: s.date, html: blocks(s.lines) }))
-    .filter((s) => s.html);
+  return {
+    entries: sections
+      .map((s) => ({ date: s.date, html: blocks(s.lines) }))
+      .filter((s) => s.html),
+    vocab,
+  };
 }
 
 // Fetched on first visit, then kept for the session (data files are read once
@@ -79,7 +100,7 @@ function loadNotes(id) {
     const p = fetch(`notes/${encodeURIComponent(id)}.md`, { cache: "no-cache" })
       .then((r) => (r.ok ? r.text() : ""))
       .then(parseNotes)
-      .catch(() => { notesCache.delete(id); return []; });
+      .catch(() => { notesCache.delete(id); return { entries: [], vocab: [] }; });
     notesCache.set(id, p);
   }
   return notesCache.get(id);
@@ -259,6 +280,33 @@ function journal(notes, b, state) {
     .join("");
 }
 
+// The word, the page it turned up on, and the sentence it lives in — with the
+// word lit up inside its own sentence (first plain match; an inflected form
+// that doesn't match simply goes unhighlighted). Alphabetical, like a glossary.
+function highlight(quote, term) {
+  const safe = esc(quote);
+  const t = esc(term);
+  const i = safe.toLowerCase().indexOf(t.toLowerCase());
+  if (i < 0) return safe;
+  return `${safe.slice(0, i)}<mark>${safe.slice(i, i + t.length)}</mark>${safe.slice(i + t.length)}`;
+}
+
+function vocabulary(vocab, b, state) {
+  if (!vocab.length) return "";
+  const items = [...vocab]
+    .sort((x, y) => x.term.localeCompare(y.term, "en", { sensitivity: "base" }))
+    .map((v) => {
+      const where = isProse()
+        ? (Number.isFinite(b.totalPages) ? fractionWord(v.page / b.totalPages) : "")
+        : `p. ${v.page}`;
+      const quote = v.quote.replace(/^["“]\s*/, "").replace(/\s*["”]$/, "");
+      return `<div class="term"><dt>${esc(v.term)}${where ? ` <span class="pg">${where}</span>` : ""}</dt>` +
+        (quote ? `<dd>“${highlight(quote, v.term)}”</dd>` : "") + `</div>`;
+    })
+    .join("");
+  return `<h2>Vocabulary</h2><dl class="vocab">${items}</dl>`;
+}
+
 export async function renderBook(state, id) {
   const box = document.getElementById("book-page");
   const b = state.byId.get(id);
@@ -270,8 +318,10 @@ export async function renderBook(state, id) {
   const token = String(Date.now()) + Math.random();
   box.dataset.token = token;
   box.innerHTML = hero(b, state) + reading(b, state) +
-    `<h2>Journal</h2><div class="journal"><p class="muted small">Opening the notebook…</p></div>`;
+    `<div class="notebook"><h2>Journal</h2><div class="journal"><p class="muted small">Opening the notebook…</p></div></div>`;
   const notes = await loadNotes(id);
   if (box.dataset.token !== token) return;
-  box.querySelector(".journal").innerHTML = journal(notes, b, state);
+  box.querySelector(".notebook").innerHTML =
+    `<h2>Journal</h2><div class="journal">${journal(notes.entries, b, state)}</div>` +
+    vocabulary(notes.vocab, b, state);
 }

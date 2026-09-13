@@ -104,6 +104,15 @@ Library and Queue tabs (js/book.js).
   and the page shows no range for it.
 - The renderer understands paragraphs, `> ` quotes (for lines worth keeping),
   `*em*` and `**strong**`. Nothing else renders — keep the files plain.
+- **Vocabulary** lives in the same file, in a `## Vocabulary` block directly
+  under the title, above the dated entries (journal entries always append to
+  the END of the file; vocabulary bullets append to the end of that block —
+  create the block if the book has none). One bullet per word, exactly as
+  Travis gives them: `* Vicissitudes, pp 892. "Of course, my forebear…"` —
+  term, comma, page, period, the sentence in quotes. The book page renders
+  the block as a glossary at the back: alphabetical, page shown, the word lit
+  up inside its own sentence. The sentences are the book's words — keep them
+  exactly as he typed them, trailing quirks included.
 - The book page shows each note under the day's range and count **from the
   log**, never from the heading. In prose mode the headings turn into words
   like everything else; the note text itself is already prose.
