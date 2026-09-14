@@ -102,6 +102,9 @@ Library and Queue tabs (js/book.js).
 - Same commit as the day's log entry (`log: 2666 pp. 842–880` covers both). A
   note on a day with no log entry is fine — the heading just carries the date
   and the page shows no range for it.
+- A second report on a day that already has a section: append the new note as
+  a fresh paragraph at the end of that section (never a second heading for the
+  same date) and refresh the heading's range to the day's merged range.
 - The renderer understands paragraphs, `> ` quotes (for lines worth keeping),
   `*em*` and `**strong**`. Nothing else renders — keep the files plain.
 - **Vocabulary** lives in the same file, in a `## Vocabulary` block directly
