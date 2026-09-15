@@ -25,7 +25,8 @@ function esc(s) {
 // note's own; a heading with no range borrows the day's merged range from the
 // log. Inside: blank-line paragraphs, "> " quotes, *em*, **strong**.
 // A "## Vocabulary" section holds one bullet per word, exactly as Travis gives
-// them: `* Term, pp 892. "The sentence it lives in."` Any other heading is
+// them: `* Term, pp 892. "The sentence it lives in."`; a "## Quotes" section
+// one bullet per passage: `* pp 20. "The passage."` Any other heading is
 // ignored. The journal is prose, not a document format — nothing else renders.
 function inline(text) {
   return esc(text)
@@ -59,11 +60,14 @@ function blocks(lines) {
 }
 
 const VOCAB_LINE = /^\*\s+(.+?),\s*pp?\.?\s*(\d+)\.?\s*(.*)$/;
+const QUOTE_LINE = /^\*\s+pp?\.?\s*(\d+)\.?\s*(.*)$/;
+const unquote = (s) => s.replace(/^["“]\s*/, "").replace(/\s*["”]$/, "");
 
 export function parseNotes(md) {
   const sections = [];
   const vocab = [];
-  let mode = null; // "entry" | "vocab" | null (anything under an unknown heading)
+  const quotes = [];
+  let mode = null; // "entry" | "vocab" | "quotes" | null (anything under an unknown heading)
   let cur = null;
   for (const line of md.split(/\r?\n/)) {
     const h = line.match(/^##\s+(.*)$/);
@@ -75,7 +79,7 @@ export function parseNotes(md) {
         mode = "entry";
       } else {
         cur = null;
-        mode = /^vocabulary\b/i.test(h[1]) ? "vocab" : null;
+        mode = /^vocabulary\b/i.test(h[1]) ? "vocab" : /^quotes?\b/i.test(h[1]) ? "quotes" : null;
       }
       continue;
     }
@@ -84,6 +88,9 @@ export function parseNotes(md) {
     } else if (mode === "vocab") {
       const m = line.match(VOCAB_LINE);
       if (m) vocab.push({ term: m[1].trim(), page: Number(m[2]), quote: m[3].trim() });
+    } else if (mode === "quotes") {
+      const m = line.match(QUOTE_LINE);
+      if (m) quotes.push({ page: Number(m[1]), text: unquote(m[2].trim()) });
     }
   }
   return {
@@ -91,6 +98,7 @@ export function parseNotes(md) {
       .map((s) => ({ date: s.date, from: s.from, to: s.to, html: blocks(s.lines) }))
       .filter((s) => s.html),
     vocab,
+    quotes,
   };
 }
 
@@ -103,7 +111,7 @@ function loadNotes(id) {
     const p = fetch(`notes/${encodeURIComponent(id)}.md`, { cache: "no-cache" })
       .then((r) => (r.ok ? r.text() : ""))
       .then(parseNotes)
-      .catch(() => { notesCache.delete(id); return { entries: [], vocab: [] }; });
+      .catch(() => { notesCache.delete(id); return { entries: [], vocab: [], quotes: [] }; });
     notesCache.set(id, p);
   }
   return notesCache.get(id);
@@ -308,12 +316,28 @@ function vocabulary(vocab, b, state) {
       const where = isProse()
         ? (Number.isFinite(b.totalPages) ? fractionWord(v.page / b.totalPages) : "")
         : `p. ${v.page}`;
-      const quote = v.quote.replace(/^["“]\s*/, "").replace(/\s*["”]$/, "");
+      const quote = unquote(v.quote);
       return `<div class="term"><dt>${esc(v.term)}${where ? ` <span class="pg">${where}</span>` : ""}</dt>` +
         (quote ? `<dd>“${highlight(quote, v.term)}”</dd>` : "") + `</div>`;
     })
     .join("");
   return `<h2>Vocabulary</h2><dl class="vocab">${items}</dl>`;
+}
+
+// Passages worth keeping, in reading order, each with the page it came from.
+function quotes(list, b, state) {
+  if (!list.length) return "";
+  const items = [...list]
+    .sort((x, y) => x.page - y.page)
+    .map((q) => {
+      const where = isProse()
+        ? (Number.isFinite(b.totalPages) ? fractionWord(q.page / b.totalPages) : "")
+        : `p. ${q.page}`;
+      return `<figure class="quote"><blockquote>“${inline(q.text)}”</blockquote>` +
+        (where ? `<figcaption>${where}</figcaption>` : "") + `</figure>`;
+    })
+    .join("");
+  return `<h2>Quotes</h2><div class="quotes">${items}</div>`;
 }
 
 export async function renderBook(state, id) {
@@ -332,5 +356,6 @@ export async function renderBook(state, id) {
   if (box.dataset.token !== token) return;
   box.querySelector(".notebook").innerHTML =
     `<h2>Journal</h2><div class="journal">${journal(notes.entries, b, state)}</div>` +
+    quotes(notes.quotes, b, state) +
     vocabulary(notes.vocab, b, state);
 }

@@ -548,6 +548,22 @@ body.prose .prose-note { display: block; }
   color: var(--ink-soft);
   max-width: 70ch;
 }
+.quotes .quote { margin: 0 0 20px; }
+.quotes blockquote {
+  margin: 0;
+  padding: 2px 0 2px 18px;
+  border-left: 3px solid var(--forest);
+  font-size: 17px;
+  line-height: 1.6;
+  max-width: 72ch;
+}
+.quotes figcaption {
+  margin: 6px 0 0 21px;
+  font-size: 13px;
+  color: var(--ink-soft);
+  font-variant-caps: small-caps;
+  letter-spacing: 0.08em;
+}
 .vocab { margin: 0; }
 .vocab .term { padding: 12px 0 10px; border-top: 1px solid var(--border); }
 .vocab .term:first-child { border-top: none; padding-top: 2px; }

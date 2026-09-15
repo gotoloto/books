@@ -118,6 +118,12 @@ Library and Queue tabs (js/book.js).
   the block as a glossary at the back: alphabetical, page shown, the word lit
   up inside its own sentence. The sentences are the book's words — keep them
   exactly as he typed them, trailing quirks included.
+- **Quotes** work the same way (2026-09-15): a `## Quotes` block under the title
+  beside Vocabulary (either order, both above the dated entries), one bullet per
+  passage: `* pp 20. "The passage."` — page, period, the passage in quotes,
+  verbatim. Rendered between the journal and the vocabulary, in page order,
+  each with its page. He may say "Quotes." and then `pp20 "…"` — the bullet
+  shape is ours, the passage is his.
 - The book page shows each note under its heading's own range (the one thing
   the heading is trusted for; the count comes from it too). A heading with no
   range falls back to the day's merged range from the log. In prose mode the
