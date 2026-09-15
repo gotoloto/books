@@ -1,8 +1,10 @@
 // Per-book page ("#book/<id>"): the cover and facts, how the reading went, the
 // journal — Travis's own words from notes/<id>.md, stored verbatim and shown
-// newest-first like the log table — and the vocabulary he collected on the way. Every number here is derived from the
-// log at render time; a note heading's page range is for people reading the
-// file on GitHub and is never trusted by the renderer.
+// newest-first like the log table — and the vocabulary he collected on the way.
+// The reading facts and sparkline come from the log (day-merged, like every
+// chart); the journal is the one per-report surface: each note's heading
+// carries the page range it was reported with, and several notes may share a
+// date (Travis, 2026-09-14 — "same day doesn't mean same entry").
 
 import {
   addDays, currentPosition, diffDays, effectiveToday, fmtLong, fmtShort, starFactor,
@@ -19,8 +21,9 @@ function esc(s) {
 }
 
 // ——— notes: a deliberately tiny Markdown subset ———
-// A dated section opens with "## YYYY-MM-DD" (the rest of that line is a label
-// for humans). Inside: blank-line paragraphs, "> " quotes, *em*, **strong**.
+// A dated section opens with "## YYYY-MM-DD · pp. A–B" — the range is the
+// note's own; a heading with no range borrows the day's merged range from the
+// log. Inside: blank-line paragraphs, "> " quotes, *em*, **strong**.
 // A "## Vocabulary" section holds one bullet per word, exactly as Travis gives
 // them: `* Term, pp 892. "The sentence it lives in."` Any other heading is
 // ignored. The journal is prose, not a document format — nothing else renders.
@@ -65,9 +68,9 @@ export function parseNotes(md) {
   for (const line of md.split(/\r?\n/)) {
     const h = line.match(/^##\s+(.*)$/);
     if (h) {
-      const d = h[1].match(/^(\d{4}-\d{2}-\d{2})\b/);
+      const d = h[1].match(/^(\d{4}-\d{2}-\d{2})\b(?:.*?pp?\.?\s*(\d+)\s*[–-]\s*(\d+))?/);
       if (d) {
-        cur = { date: d[1], lines: [] };
+        cur = { date: d[1], from: d[2] ? Number(d[2]) : null, to: d[3] ? Number(d[3]) : null, lines: [] };
         sections.push(cur);
         mode = "entry";
       } else {
@@ -85,7 +88,7 @@ export function parseNotes(md) {
   }
   return {
     entries: sections
-      .map((s) => ({ date: s.date, html: blocks(s.lines) }))
+      .map((s) => ({ date: s.date, from: s.from, to: s.to, html: blocks(s.lines) }))
       .filter((s) => s.html),
     vocab,
   };
@@ -264,16 +267,22 @@ function journal(notes, b, state) {
   }
   const days = state.daily.get(b.id) || new Map();
   const f = starFactor(b, state.gWpp);
-  return [...notes]
-    .sort((a, c) => (a.date < c.date ? 1 : a.date > c.date ? -1 : 0))
+  // Newest first, and within a day the later report first (file order is
+  // chronological, so a higher index is the later session).
+  return notes
+    .map((n, i) => ({ ...n, i }))
+    .sort((a, c) => (a.date < c.date ? 1 : a.date > c.date ? -1 : c.i - a.i))
     .map((n) => {
       const info = days.get(n.date);
+      const own = n.from != null && n.to != null;
+      const from = own ? n.from : info ? info.ranges[0][0] : null;
+      const to = own ? n.to : info ? info.ranges[info.ranges.length - 1][1] : null;
+      const pages = own ? n.to - n.from : info ? info.pages : 0;
       let head;
       if (isProse()) {
-        head = cap(dateWord(n.date, state.today)) + (info ? ` · ${sessionWord(info.pages * f)}` : "");
+        head = cap(dateWord(n.date, state.today)) + (pages > 0 ? ` · ${sessionWord(pages * f)}` : "");
       } else {
-        const range = info ? ` · pp. ${info.ranges[0][0]}–${info.ranges[info.ranges.length - 1][1]}` : "";
-        head = fmtLong(n.date) + range;
+        head = fmtLong(n.date) + (from != null ? ` · pp. ${from}–${to}` : "");
       }
       return `<article class="entry"><h3><time datetime="${n.date}">${head}</time></h3>${n.html}</article>`;
     })

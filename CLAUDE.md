@@ -30,7 +30,9 @@ entries. But **every user-visible surface merges to (book, day)**: one scatter d
 tooltip range (first `from` → last `to`), one reading-log table row, day-based records
 only. Never surface individual sessions in the UI. (Merged ranges lean on the
 continuity rule; a deliberate re-read day would show a range narrower than its page
-count — acceptable.)
+count — acceptable.) **The one exception is the journal** (see "Reading notes"):
+a note belongs to the report it came with, so the book page lists notes per
+report, each with its own page range (Travis, 2026-09-14).
 
 ## Daily update recipe
 
@@ -91,10 +93,10 @@ about…"). Those live in **`notes/<book-id>.md`**, one file per book, and rende
 the book's page — `#book/<id>`, reached from any cover, title, or spine on the
 Library and Queue tabs (js/book.js).
 
-- One section per reading day: a `## YYYY-MM-DD · pp. A–B` heading (the date is
-  the only thing the site parses; the range is for people reading the file on
-  GitHub — use the day's merged range), a blank line, then the note. Append at
-  the end of the file, chronological like the log; the site shows newest first.
+- One section per report: a `## YYYY-MM-DD · pp. A–B` heading carrying **that
+  report's own range** (the pages it arrived with — not the day's merged range),
+  a blank line, then the note. Append at the end of the file, chronological like
+  the log; the site shows newest first, later report first within a day.
 - **His words, verbatim.** Never edit, tighten, correct, or "improve" a note —
   not spelling, not phrasing, not a "Yesterday" sitting under a dated heading.
   Fix a typo only when he asks. The journal is his voice; only the structure
@@ -102,9 +104,9 @@ Library and Queue tabs (js/book.js).
 - Same commit as the day's log entry (`log: 2666 pp. 842–880` covers both). A
   note on a day with no log entry is fine — the heading just carries the date
   and the page shows no range for it.
-- A second report on a day that already has a section: append the new note as
-  a fresh paragraph at the end of that section (never a second heading for the
-  same date) and refresh the heading's range to the day's merged range.
+- **Same day doesn't mean same entry** (Travis, 2026-09-14): a second report on
+  a day gets its own `## YYYY-MM-DD · pp. A–B` section with its own range. Never
+  fold a new note into an earlier section, even on the same date.
 - The renderer understands paragraphs, `> ` quotes (for lines worth keeping),
   `*em*` and `**strong**`. Nothing else renders — keep the files plain.
 - **Vocabulary** lives in the same file, in a `## Vocabulary` block directly
@@ -116,9 +118,11 @@ Library and Queue tabs (js/book.js).
   the block as a glossary at the back: alphabetical, page shown, the word lit
   up inside its own sentence. The sentences are the book's words — keep them
   exactly as he typed them, trailing quirks included.
-- The book page shows each note under the day's range and count **from the
-  log**, never from the heading. In prose mode the headings turn into words
-  like everything else; the note text itself is already prose.
+- The book page shows each note under its heading's own range (the one thing
+  the heading is trusted for; the count comes from it too). A heading with no
+  range falls back to the day's merged range from the log. In prose mode the
+  headings turn into words like everything else; the note text itself is
+  already prose.
 - The repo and site are public and Travis is fine with that — notes may carry
   spoilers, and they are not veiled.
 - Never write a note on his behalf. If a report has pages but no summary, log
