@@ -19,3 +19,7 @@ Just some exposition by our narrarator about his mother. The explicit cultural r
 ## 2026-09-14 · pp. 18–27
 
 more inspection of his fellow cast in the play. We learn MC's name is Edmond (Eddy) Porteous. He's really into this Matt Chin fellow, constantly inspecting his facial expressions.
+
+## 2026-09-15 · pp. 27–34
+
+Exposition about Eddie's late high school life and his relationship with his friend Dionne.
