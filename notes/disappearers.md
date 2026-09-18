@@ -27,3 +27,7 @@ Exposition about Eddie's late high school life and his relationship with his fri
 ## 2026-09-17 · pp. 34–42
 
 Eddie contemplates his mortal form.
+
+## 2026-09-17 · pp. 42–73
+
+Eddie and Havelock discover that Jordan Brown has probably been disowned and is now homeless, sleeping in his car at lookout point -- it's a really sad scene. Eddie navigates a world hostile to homosexuality. He gets really mad at Dionne for teasing him publicly about the new Prince album.
