@@ -24,7 +24,7 @@ more inspection of his fellow cast in the play. We learn MC's name is Edmond (Ed
 
 Exposition about Eddie's late high school life and his relationship with his friend Dionne.
 
-## 2026-09-17 · pp. 34–42
+## 2026-09-16 · pp. 34–42
 
 Eddie contemplates his mortal form.
 
