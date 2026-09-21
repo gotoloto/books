@@ -31,3 +31,7 @@ Eddie contemplates his mortal form.
 ## 2026-09-17 · pp. 42–73
 
 Eddie and Havelock discover that Jordan Brown has probably been disowned and is now homeless, sleeping in his car at lookout point -- it's a really sad scene. Eddie navigates a world hostile to homosexuality. He gets really mad at Dionne for teasing him publicly about the new Prince album.
+
+## 2026-09-20 · pp. 73–103
+
+Eddie and Kofi have a tryst and we see Eddie being powerless to Kofi's smile. An encounter occurs in which consent is a major theme, and we learn Kofi stops short of specific biblical transgressions. Jordan takes Eddie to a foul former diplomat's house, decorated in explicit ways. Then May 20th ends in an ominous burning of all of UWI's dormitory bedding due to an AIDS scare.
