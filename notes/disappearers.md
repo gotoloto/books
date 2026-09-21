@@ -35,3 +35,7 @@ Eddie and Havelock discover that Jordan Brown has probably been disowned and is 
 ## 2026-09-20 · pp. 73–103
 
 Eddie and Kofi have a tryst and we see Eddie being powerless to Kofi's smile. An encounter occurs in which consent is a major theme, and we learn Kofi stops short of specific biblical transgressions. Jordan takes Eddie to a foul former diplomat's house, decorated in explicit ways. Then May 20th ends in an ominous burning of all of UWI's dormitory bedding due to an AIDS scare.
+
+## 2026-09-21 · pp. 103–116
+
+Eddie spends more time with the theater troupe. The theater troupe banter is the hardest for me to follow. After rehearsal a subgroup goes to a gay “club” event, which is just a few people poolside. Jordan is beginning to explain how his exile happened but I have to wrap up mid-chapter.
