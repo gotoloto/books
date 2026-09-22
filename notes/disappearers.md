@@ -39,3 +39,7 @@ Eddie and Kofi have a tryst and we see Eddie being powerless to Kofi's smile. An
 ## 2026-09-21 · pp. 103–116
 
 Eddie spends more time with the theater troupe. The theater troupe banter is the hardest for me to follow. After rehearsal a subgroup goes to a gay “club” event, which is just a few people poolside. Jordan is beginning to explain how his exile happened but I have to wrap up mid-chapter.
+
+## 2026-09-21 · pp. 116–124
+
+I feel bad for Eddie's mom just wanting to dance with him. She is a modern woman after all.
