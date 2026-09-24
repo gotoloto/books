@@ -47,3 +47,7 @@ I feel bad for Eddie's mom just wanting to dance with him. She is a modern woman
 ## 2026-09-22 · pp. 124–136
 
 Eddie's sister has grown up fast, but knows he's gay. Jordan has missed the last several practices.  Eddie says worrisome things about his high school experience. Eddie has a novel experience with his feet in a shopping bag.
+
+## 2026-09-23 · pp. 136–155
+
+The cast relate horrible stories of oppression and violence. Havelock and Eddie rescue Jordan from the diplomat, Eddie's partner Kofi won't pick up the phone.
