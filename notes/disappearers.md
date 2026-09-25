@@ -51,3 +51,7 @@ Eddie's sister has grown up fast, but knows he's gay. Jordan has missed the last
 ## 2026-09-23 · pp. 136–155
 
 The cast relate horrible stories of oppression and violence. Havelock and Eddie rescue Jordan from the diplomat, Eddie's partner Kofi won't pick up the phone.
+
+## 2026-09-24 · pp. 155–163
+
+The section ended so suddenly! Suddenly Eddie’s parents are in a massive domestic that would result in jail time, but before we can even recover, Eddie is going past a crime scene ‘at the old house.’ We are left to guess if it is his house. The journal is dated 4 days after the Domestic.
