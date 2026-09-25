@@ -109,13 +109,13 @@
       "id": "planet-money",
       "title": "Planet Money: A Guide to the Economic Forces That Shape Your Life",
       "author": "Alex Mayyasi",
-      "totalPages": 336,
-      "wordsPerPage": null,
+      "totalPages": 283,
+      "wordsPerPage": 375,
       "cover": "covers/planet-money.jpg",
       "color": "#1B3692",
-      "status": "planned",
-      "startPage": null,
-      "startDate": null,
+      "status": "reading",
+      "startPage": 32,
+      "startDate": "2026-09-25",
       "finishDate": null
     },
     {
