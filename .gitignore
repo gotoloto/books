@@ -5,3 +5,4 @@
 * [Pp]ages/
 .DS_Store
 .claude/
+__pycache__/
