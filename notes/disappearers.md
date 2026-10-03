@@ -55,3 +55,7 @@ The cast relate horrible stories of oppression and violence. Havelock and Eddie 
 ## 2026-09-24 · pp. 155–163
 
 The section ended so suddenly! Suddenly Eddie’s parents are in a massive domestic that would result in jail time, but before we can even recover, Eddie is going past a crime scene ‘at the old house.’ We are left to guess if it is his house. The journal is dated 4 days after the Domestic.
+
+## 2026-10-03 · pp. 163–196
+
+The entire blackjacks section. Ouch. That was far more violent than anything in 2666 except for maybe the prison torture scene. I had to read it in one go because I knew it would be difficult to return to. Truly affecting as we spent so many pages getting to know these people. And unlike anything in 2666, since it's being spoken from the perpetrators perspective, it's sickening. Rainford Ellis' injury is haunting. I wanted to hug all my gay friends. So the end of "The Play" section makes sense now -- this is what Eddie came upon. I started the next section, The Disappearers, to palate cleanse a little -- seems we're following Jordan now, who had seemed very brave in the attack.
