@@ -60,6 +60,8 @@ function blocks(lines) {
 }
 
 const VOCAB_LINE = /^\*\s+(.+?),\s*pp?\.?\s*(\d+)\.?\s*(.*)$/;
+// A word logged without its page — `* ecru. "…"` — stays unpaged; never guessed.
+const VOCAB_BARE = /^\*\s+([^"“]+?)\s*[.,:]?\s*(["“].*)$/;
 const QUOTE_LINE = /^\*\s+pp?\.?\s*(\d+)\.?\s*(.*)$/;
 const unquote = (s) => s.replace(/^["“]\s*/, "").replace(/\s*["”]$/, "");
 
@@ -87,7 +89,9 @@ export function parseNotes(md) {
       cur.lines.push(line);
     } else if (mode === "vocab") {
       const m = line.match(VOCAB_LINE);
+      const bare = m ? null : line.match(VOCAB_BARE);
       if (m) vocab.push({ term: m[1].trim(), page: Number(m[2]), quote: m[3].trim() });
+      else if (bare) vocab.push({ term: bare[1].trim(), page: null, quote: bare[2].trim() });
     } else if (mode === "quotes") {
       const m = line.match(QUOTE_LINE);
       if (m) quotes.push({ page: Number(m[1]), text: unquote(m[2].trim()) });
@@ -313,8 +317,8 @@ function vocabulary(vocab, b, state) {
   const items = [...vocab]
     .sort((x, y) => x.term.localeCompare(y.term, "en", { sensitivity: "base" }))
     .map((v) => {
-      const where = isProse()
-        ? (Number.isFinite(b.totalPages) ? fractionWord(v.page / b.totalPages) : "")
+      const where = v.page == null ? ""
+        : isProse() ? (Number.isFinite(b.totalPages) ? fractionWord(v.page / b.totalPages) : "")
         : `p. ${v.page}`;
       const quote = unquote(v.quote);
       return `<div class="term"><dt>${esc(v.term)}${where ? ` <span class="pg">${where}</span>` : ""}</dt>` +

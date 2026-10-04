@@ -117,7 +117,9 @@ Library and Queue tabs (js/book.js).
   term, comma, page, period, the sentence in quotes. The book page renders
   the block as a glossary at the back: alphabetical, page shown, the word lit
   up inside its own sentence. The sentences are the book's words — keep them
-  exactly as he typed them, trailing quirks included.
+  exactly as he typed them, trailing quirks included. No page given? Store the
+  bullet without one (`* ecru. "This white artist type…"`) — never guess a
+  page; the glossary shows the word unpaged until he supplies it.
 - **Quotes** work the same way (2026-09-15): a `## Quotes` block under the title
   beside Vocabulary (either order, both above the dated entries), one bullet per
   passage: `* pp 20. "The passage."` — page, period, the passage in quotes,
