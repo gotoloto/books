@@ -7,6 +7,7 @@
 ## Vocabulary
 
 * Higgler, pp 23. "Higgler run business."
+* ecru. "This white artist type in Miami with an ecru smile"
 
 ## 2026-09-13 · pp. 0–15
 
@@ -59,3 +60,7 @@ The section ended so suddenly! Suddenly Eddie’s parents are in a massive domes
 ## 2026-10-02 · pp. 163–196
 
 The entire blackjacks section. Ouch. That was far more violent than anything in 2666 except for maybe the prison torture scene. I had to read it in one go because I knew it would be difficult to return to. Truly affecting as we spent so many pages getting to know these people. And unlike anything in 2666, since it's being spoken from the perpetrators perspective, it's sickening. Rainford Ellis' injury is haunting. I wanted to hug all my gay friends. So the end of "The Play" section makes sense now -- this is what Eddie came upon. I started the next section, The Disappearers, to palate cleanse a little -- seems we're following Jordan now, who had seemed very brave in the attack.
+
+## 2026-10-03 · pp. 196–212
+
+Jordan ominously refers to doing what he realizes he's here to do, and after which, he maybe doesn't want his unborn daughter to know him -- sounds like he is planning retribution against the Lady Musgrave Road killers. I still don't really know who Jordan has a daughter - it sounds at times both planned and unplanned.
