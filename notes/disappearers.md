@@ -64,3 +64,7 @@ The entire blackjacks section. Ouch. That was far more violent than anything in 
 ## 2026-10-03 · pp. 196–212
 
 Jordan ominously refers to doing what he realizes he's here to do, and after which, he maybe doesn't want his unborn daughter to know him -- sounds like he is planning retribution against the Lady Musgrave Road killers. I still don't really know who Jordan has a daughter - it sounds at times both planned and unplanned.
+
+## 2026-10-04 · pp. 212–234
+
+Jordan comes up with creative ways to inflict suffering on his paralyzed father. He and Jordan are now in communication.
