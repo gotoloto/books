@@ -68,3 +68,7 @@ Jordan ominously refers to doing what he realizes he's here to do, and after whi
 ## 2026-10-04 · pp. 212–234
 
 Jordan comes up with creative ways to inflict suffering on his paralyzed father. He and Jordan are now in communication.
+
+## 2026-10-05 · pp. 234–258
+
+Eddie and Jordan bond as we learn about the immediate aftermath of the attack.
