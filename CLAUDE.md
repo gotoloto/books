@@ -194,8 +194,13 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
    a cream title never qualify), take the highest; an achromatic cover takes
    its largest cluster that clears 1.6:1 vs the eggshell page (#F0EAD6); any
    pick failing that floor is darkened by scaling its channels evenly. Show
-   the census so Travis can veto a pick. Spine text picks ink vs eggshell by
-   WCAG contrast (js/library.js `relLum`). `PALETTE` in js/stats.js remains
+   the census so Travis can veto a pick. If he vetoes an achromatic pick (The
+   AGI Chronicles, 2026-10-06: a black cover whose rainbow title is all under
+   2% of it), rerun with `--min-share 0` so the title's clusters qualify and
+   the usual score chooses among them; that color survives only targeted runs,
+   so a blanket `--write` over every cover would put the black back — always
+   pass ids. Spine text picks ink vs eggshell by WCAG contrast (js/library.js
+   `relLum`). `PALETTE` in js/stats.js remains
    only as the fallback for books with no stored color.
 5. `status: "reading"`.
 6. Cover if missing or wrong edition: Goodreads autocomplete API

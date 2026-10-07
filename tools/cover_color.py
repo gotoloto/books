@@ -5,6 +5,7 @@
     python3 tools/cover_color.py 2666 trash      # just these book ids
     python3 tools/cover_color.py covers/x.jpg    # any image (e.g. a cover not yet in books.json)
     python3 tools/cover_color.py --write [ids…]  # also store the picks in data/books.json
+    python3 tools/cover_color.py --min-share 0 agi-chronicles   # Travis vetoed the black: let a thin title qualify
 
 One `color` per book paints the spine, the cumulative-chart series, the
 scatter stems, the finish pennant and the book page's sparkline. Travis's call
@@ -42,7 +43,12 @@ The algorithm (needs Pillow + numpy: `pip install pillow numpy`):
    in the browser (js/library.js `spineInk`).
 
 The census printed for each cover lets Travis veto a pick; `--write` stores
-them. Never store pages*-style derived numbers elsewhere — this one *is* a
+them. When he vetoes an achromatic pick (The AGI Chronicles, 2026-10-06: a
+black cover whose rainbow title is all under 2% of it), `--min-share 0`
+drops the share floor so the title's clusters qualify and the usual
+chroma × share^0.3 score chooses among them. Such a color only survives
+targeted runs — a blanket `--write` over every cover would put the black
+back, so always pass ids. Never store pages*-style derived numbers elsewhere — this one *is* a
 stored fact, recomputed only when a cover lands or changes.
 """
 import argparse
@@ -257,10 +263,14 @@ def report(label, path, clusters, c, why, raw, final, darkened, old=None):
     print(line)
 
 def main():
+    global MIN_SHARE
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     ap.add_argument("targets", nargs="*", help="book ids from books.json and/or image paths (default: every book with a cover)")
     ap.add_argument("--write", action="store_true", help="store the picks in data/books.json")
+    ap.add_argument("--min-share", type=float, default=MIN_SHARE, metavar="FRAC",
+                    help=f"share floor for an accent cluster (default {MIN_SHARE}); 0 when Travis has vetoed an achromatic pick")
     args = ap.parse_args()
+    MIN_SHARE = args.min_share
 
     with open(BOOKS, encoding="utf-8") as f:
         data = json.load(f)
