@@ -221,17 +221,22 @@
       "startPage": null,
       "startDate": null,
       "finishDate": null
-    }
-  ],
-  "forthcoming": [
+    },
     {
       "id": "agi-chronicles",
       "title": "The AGI Chronicles",
       "author": "Kevin Roose",
-      "totalPages": 448,
+      "totalPages": 362,
+      "wordsPerPage": 392,
       "cover": "covers/agi-chronicles.jpg",
-      "releaseDate": "2026-10-06"
-    },
+      "color": "#000000",
+      "status": "reading",
+      "startPage": 0,
+      "startDate": "2026-10-06",
+      "finishDate": null
+    }
+  ],
+  "forthcoming": [
     {
       "id": "miss-lambert",
       "title": "Miss Lambert Steps Aboard Danger",
