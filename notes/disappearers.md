@@ -72,3 +72,7 @@ Jordan comes up with creative ways to inflict suffering on his paralyzed father.
 ## 2026-10-05 · pp. 234–258
 
 Eddie and Jordan bond as we learn about the immediate aftermath of the attack.
+
+## 2026-10-06 · pp. 258–264
+
+Jordan tells us that Eddie and Matt may have had a romantic moment post-attack.
