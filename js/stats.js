@@ -2,9 +2,9 @@ import {
   addDays, cumulativeSeries, dailyPoints, diffDays, effectiveToday,
   fmtLong, fmtShort, perDayTotals, records, starFactor,
 } from "./derive.js";
-import { renderCumulative, renderCumulativeTotal, renderDaily, renderHeatmap } from "./charts.js";
+import { renderBars, renderCumulative, renderCumulativeTotal, renderDaily, renderHeatmap } from "./charts.js";
 import {
-  isProse, cap, dateWord, sessionWord, streakWord, totalWord,
+  isProse, cap, dateWord, durationWord, lengthWord, paceWord, sessionWord, streakWord, totalWord,
 } from "./prose.js";
 
 // Validated series palette — fixed assignment order, never shuffled.
@@ -175,6 +175,50 @@ function renderRecords(state) {
   document.getElementById("records").innerHTML = tiles
     .map((t) => `<div class="tile"><div class="checker" aria-hidden="true"></div><div class="val">${t.val}</div><div class="lbl">${t.lbl}</div></div>`)
     .join("");
+}
+
+// Two ranked bar lists over FINISHED books only, each sorted largest-first on
+// its own measure. "Days reading" is the calendar span from startDate to
+// finishDate inclusive — a day the book sat open but unread still counts, which
+// is exactly why it differs from the Hall of Fame's "days read". Pace divides
+// the tracked pages (2666's untracked 1–410 stay out, as everywhere) by that
+// span, in the page-wide unit.
+function renderBookBars(state) {
+  const useStar = unitStar();
+  const U = useStar ? "pp*" : "pp";
+  const t = state.today;
+  const rows = state.books
+    .filter((b) => b.status === "finished" && b.startDate && b.finishDate)
+    .map((b) => {
+      let pages = 0;
+      for (const info of (state.daily.get(b.id) || new Map()).values()) pages += info.pages;
+      const span = Math.max(1, diffDays(b.startDate, b.finishDate) + 1);
+      const v = pages * (useStar ? starFactor(b, state.gWpp) : 1);
+      return { title: b.title, color: bookColor(b, state), start: b.startDate, end: b.finishDate, span, pages, v };
+    });
+
+  const days = rows.map((r) => ({
+    title: r.title, color: r.color, v: r.span,
+    label: isProse() ? durationWord(r.span) : `${r.span} ${r.span === 1 ? "day" : "days"}`,
+    tip: isProse()
+      ? `Started ${dateWord(r.start, t)}, finished ${dateWord(r.end, t)} — ${durationWord(r.span)}`
+      : `${fmtShort(r.start)} – ${fmtShort(r.end)} · <b>${r.span}</b> ${r.span === 1 ? "day" : "days"}`,
+  }));
+  days.sort((a, b) => b.v - a.v);
+  renderBars(document.getElementById("chart-d"), days, { empty: "Nothing finished yet." });
+
+  const pace = rows.map((r) => {
+    const ppd = r.v / r.span;
+    return {
+      title: r.title, color: r.color, v: ppd,
+      label: isProse() ? paceWord(ppd) : `${ppd.toFixed(1)} ${U}/day`,
+      tip: isProse()
+        ? `${cap(lengthWord(r.v))} over ${durationWord(r.span)}, ${paceWord(ppd)}`
+        : `<b>${Math.round(r.v)}</b> ${U} over ${r.span} ${r.span === 1 ? "day" : "days"} · <b>${ppd.toFixed(1)}</b> ${U}/day`,
+    };
+  });
+  pace.sort((a, b) => b.v - a.v);
+  renderBars(document.getElementById("chart-e"), pace, { empty: "Nothing finished yet." });
 }
 
 function renderCharts(state) {
@@ -349,6 +393,7 @@ export function renderStats(state) {
   perDay = perDayTotals(state.daily, state.books, state.gWpp, unitStar());
   buildControls(state);
   renderRecords(state);
+  renderBookBars(state);
   renderHeatmap(document.getElementById("heatmap"), perDay, {
     today: effectiveToday(state.entries, state.today),
     start: day0(state), // the grid begins at Day 0 and grows — no phantom empty year

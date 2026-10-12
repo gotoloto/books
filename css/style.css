@@ -392,6 +392,16 @@ em.aside { color: var(--ink-soft); font-size: 15px; }
 }
 
 .chart-block { margin-bottom: 44px; }
+/* two ranked bar lists side by side (finished books); each cell's h2 is its
+   first child, so the pair's own top margin stands in for the heading's */
+.pair {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 36px;
+  margin-top: 4px;
+}
+.pair > div { min-width: 0; }
+.pair h2 { margin-top: 0; }
 .chart-wrap { position: relative; }
 .chart-wrap svg { display: block; width: 100%; }
 .legend {
@@ -613,4 +623,7 @@ a.spine:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
   .tabs a { padding: 5px 12px 7px; letter-spacing: 0.1em; }
   .q-row .rank { width: 30px; font-size: 19px; }
   .tile .val { font-size: 27px; }
+  .pair { grid-template-columns: 1fr; }
+  .pair h2 { margin-top: 10px; }
+  .pair > div:first-child h2 { margin-top: 0; }
 }

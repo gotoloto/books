@@ -497,3 +497,71 @@ export function renderHeatmap(container, perDay, opts) {
   // Open scrolled to today (the right edge) on narrow screens.
   scroll.scrollLeft = scroll.scrollWidth;
 }
+
+// ——— Bar list: one horizontal bar per book, ranked ———
+// rows: [{title, color, v, label, tip}] ALREADY sorted largest-first. The title
+// sits above its bar and the value at the row's right edge, so any width (a
+// phone, a prose-mode phrase) fits without a label gutter; every bar shares one
+// scale from zero over a faint full-width track. Hard edges, like the rest.
+
+export function renderBars(container, rows, opts = {}) {
+  const { empty = "Nothing finished yet." } = opts;
+  container.innerHTML = "";
+  if (!rows.length) {
+    container.innerHTML = `<div class="chart-empty">${esc(empty)}</div>`;
+    return;
+  }
+  const width = Math.max(260, container.clientWidth);
+  const ROW = 46, BAR = 13, TOP = 4, BOTTOM = 8;
+  const height = TOP + rows.length * ROW + BOTTOM;
+  const svg = el("svg", { width, height, viewBox: `0 0 ${width} ${height}`, role: "img" });
+  container.appendChild(svg);
+  const max = Math.max(1e-9, ...rows.map((r) => r.v));
+
+  const hits = el("g");
+  rows.forEach((r, i) => {
+    const yText = TOP + i * ROW + 13;
+    const yBar = yText + 9;
+    // Clip the title so it never runs under the value (≈ 6.4px per serif glyph at 12.5px).
+    const valW = r.label.length * 7 + 16;
+    const chars = Math.max(6, Math.floor((width - valW) / 6.4));
+    const title = r.title.length > chars ? r.title.slice(0, chars - 1).trimEnd() + "…" : r.title;
+
+    const t = el("text", { x: 5, y: yText, "text-anchor": "start", "font-size": 12.5 });
+    t.textContent = title;
+    svg.appendChild(t);
+    const v = el("text", {
+      x: width, y: yText, "text-anchor": "end", "font-size": 12.5,
+      fill: "#1E2A1E", style: "font-variant-numeric: tabular-nums",
+    });
+    v.textContent = r.label;
+    svg.appendChild(v);
+
+    const g = el("g", { "shape-rendering": "crispEdges" });
+    g.appendChild(el("rect", { x: 0, y: yBar, width, height: BAR, fill: "#E4DCC3" }));
+    g.appendChild(el("rect", {
+      x: 0, y: yBar, width: Math.max(2, (r.v / max) * width).toFixed(1), height: BAR,
+      fill: r.color, "fill-opacity": 0.9,
+    }));
+    svg.appendChild(g);
+    hits.appendChild(el("rect", {
+      x: 0, y: TOP + i * ROW, width, height: ROW, fill: "transparent", "data-i": i,
+    }));
+  });
+  // shared zero line
+  svg.appendChild(el("line", {
+    x1: 0.5, x2: 0.5, y1: TOP, y2: height - BOTTOM, stroke: "#4A523F", "stroke-width": 1,
+    "shape-rendering": "crispEdges",
+  }));
+  svg.appendChild(hits);
+
+  const show = (e) => {
+    const hit = e.target.closest("[data-i]");
+    if (!hit) { tooltipHide(); return; }
+    const r = rows[Number(hit.getAttribute("data-i"))];
+    tooltipShow(container, `<span class="tt-date">${esc(r.title)}</span>${r.tip}`, e.clientX, e.clientY);
+  };
+  svg.addEventListener("mousemove", show);
+  svg.addEventListener("click", show); // tap-to-show for touch
+  svg.addEventListener("mouseleave", tooltipHide);
+}

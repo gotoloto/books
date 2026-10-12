@@ -263,9 +263,9 @@ js/derive.js      pure math: dates (UTC-safe), wpp, aggregation — has no DOM
 js/main.js        fetch (no-cache), router, error banner
 js/library.js     reading cards + finished shelf
 js/queue.js       drag-drop ranking, localStorage `books:queue-order:v2` (drag-only writes)
-js/charts.js      hand-rolled SVG primitives + tooltip
+js/charts.js      hand-rolled SVG primitives + tooltip (incl. renderBars, the ranked bar list)
 js/prose.js       prose-mode store + the number→word lexicon
-js/stats.js       records strip, cumulative charts (by book + total), daily scatter, log table, PALETTE
+js/stats.js       records strip, finished-book bar pair, cumulative charts (by book + total), daily scatter, log table, PALETTE
 js/book.js        per-book page (#book/<id>): hero, how the reading went, the journal
 data/books.json   one entry per book (see fields above)
 data/log.json     append-only reading log
@@ -317,4 +317,11 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
   from the same per-day rollup and window-relative like them, so the two charts
   agree at every hovered date; in ALL (the default) it is the running total since
   Day 0. Single forest-green line, no legend.
+- **Finished-book bars** (2026-10-12, under the Hall of Fame; `.pair` in CSS —
+  side by side on desktop, stacked under 700px): "Days reading" = calendar span
+  startDate→finishDate inclusive (a day the book sat open unread still counts —
+  deliberately not the Hall of Fame's "days read"); "Pages per day" = tracked
+  pages (2666's untracked 1–410 excluded, as everywhere) ÷ that span, in the
+  page-wide unit. Finished books only, each chart ranked largest-first on its
+  own measure. Prose mode speaks in `durationWord` / `paceWord`.
 - Keep this file updated when workflows change.
