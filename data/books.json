@@ -234,6 +234,19 @@
       "startPage": 0,
       "startDate": "2026-10-06",
       "finishDate": null
+    },
+    {
+      "id": "master-and-margarita",
+      "title": "The Master and Margarita",
+      "author": "Mikhail Bulgakov",
+      "totalPages": 396,
+      "wordsPerPage": 410,
+      "cover": "covers/master-and-margarita.jpg",
+      "color": "#B82727",
+      "status": "planned",
+      "startPage": null,
+      "startDate": null,
+      "finishDate": null
     }
   ],
   "forthcoming": [

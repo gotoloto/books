@@ -208,7 +208,11 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
    suffix from `imageUrl` for full size) or Amazon by ISBN-10
    (`images.amazon.com/images/P/<ISBN10>.01.LZZZZZZZ.jpg`). Save to
    `covers/<id>.jpg` — **lowercase** (Pages is case-sensitive), real JPEG, ≤900px tall
-   (`sips -Z 900 -s format jpeg`). Prefer the edition Travis owns.
+   (`sips -Z 900 -s format jpeg`). Prefer the edition Travis owns. Cloud sessions
+   often can't reach any image host (the proxy refuses Goodreads, Amazon, Open
+   Library, Google Books) — then say so and ask Travis to attach the cover image
+   in chat. Never crop a cover out of a photo of the book (tried 2026-10-15; he
+   vetoed it).
 
 Adding a brand-new planned book: append to `books` with `status:"planned"`, fetch its
 cover the same way, and set `totalPages` to the Goodreads record's page count (the
