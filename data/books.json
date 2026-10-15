@@ -80,6 +80,19 @@
       "finishDate": "2026-08-25"
     },
     {
+      "id": "you-dont-need-a-smartphone",
+      "title": "You Don't Need a Smartphone",
+      "author": "August Lamm",
+      "totalPages": 199,
+      "wordsPerPage": 182,
+      "cover": "covers/you-dont-need-a-smartphone.jpg",
+      "color": "#547AAC",
+      "status": "planned",
+      "startPage": null,
+      "startDate": null,
+      "finishDate": null
+    },
+    {
       "id": "down-time",
       "title": "Down Time",
       "author": "Andrew Martin",
