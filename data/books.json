@@ -87,10 +87,10 @@
       "wordsPerPage": 182,
       "cover": "covers/you-dont-need-a-smartphone.jpg",
       "color": "#547AAC",
-      "status": "planned",
-      "startPage": null,
-      "startDate": null,
-      "finishDate": null
+      "status": "finished",
+      "startPage": 0,
+      "startDate": "2026-10-15",
+      "finishDate": "2026-10-15"
     },
     {
       "id": "down-time",
