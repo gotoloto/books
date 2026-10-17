@@ -99,6 +99,7 @@
     { "date": "2026-10-13", "book": "agi-chronicles", "from": 210, "to": 243 },
     { "date": "2026-10-14", "book": "agi-chronicles", "from": 243, "to": 246 },
     { "date": "2026-10-15", "book": "you-dont-need-a-smartphone", "from": 0, "to": 199 },
-    { "date": "2026-10-15", "book": "agi-chronicles", "from": 246, "to": 262 }
+    { "date": "2026-10-15", "book": "agi-chronicles", "from": 246, "to": 262 },
+    { "date": "2026-10-16", "book": "agi-chronicles", "from": 262, "to": 311 }
   ]
 }
