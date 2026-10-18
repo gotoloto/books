@@ -1,7 +1,7 @@
 // Hand-rolled SVG chart primitives. Fixed-pixel coordinates (1 svg unit = 1 css px),
 // full re-render on every change — the data is tiny.
 
-import { addDays, diffDays, fmtShort, fmtMonth, fmtMonthYear, fmtLong, fromUTCms, mondayOf } from "./derive.js";
+import { PACE_HALF_LIFE, addDays, diffDays, fmtShort, fmtMonth, fmtMonthYear, fmtLong, fromUTCms, mondayOf } from "./derive.js";
 import { cap, dateWord, sessionWord, totalWord } from "./prose.js";
 
 const NS = "http://www.w3.org/2000/svg";
@@ -288,7 +288,7 @@ export function renderCumulativeTotal(container, points, opts) {
 // per day (day granularity). Multi-book days stack their stem in book colors,
 // bottom-up in stable book order, with a hairline eggshell cut at each joint;
 // the dot wears the top segment's color. opts.pace = [{date, v}] draws the
-// 7-day rolling mean as a dashed line.
+// forecast's weighted pace (derive.js paceSeries) as a dashed line.
 
 export function renderDaily(container, days, opts) {
   const { winStart, winEnd, unitLabel, pace = [], prose } = opts;
@@ -316,8 +316,8 @@ export function renderDaily(container, days, opts) {
     const cap = document.createElement("p");
     cap.className = "footnote";
     cap.textContent = prose
-      ? "– – the shape of the week"
-      : `– – 7-day rolling pace (${unitLabel === "pages" ? "pp" : "pp*"}/day)`;
+      ? "– – the pace, as the forecast remembers it"
+      : `– – pace (${unitLabel === "pages" ? "pp" : "pp*"}/day; recent days weigh more, ${PACE_HALF_LIFE}-day half-life)`;
     container.appendChild(cap);
   }
 

@@ -207,37 +207,79 @@ export function effectiveToday(entries, today) {
 }
 
 // ——— recent pace (pages* per day, ALL books — the one true pace) ———
-// Trailing-14-day mean in typesetting-normalized pages*; denominator shrinks
-// while the log is young. Book-agnostic by design: forecasts everywhere read
-// as "if all subsequent reading went here". Normalized so that time estimates
-// stay honest when the current book's density differs from a target book's:
-// a day of dense Bolaño buys more airy Chambers than raw page math implies.
+// Exponentially weighted mean in typesetting-normalized pages*: every day
+// since the first logged one counts (unlogged days as zero), day d weighing
+// 0.5^((end − d) / PACE_HALF_LIFE). Replaced the trailing-14-day mean on
+// 2026-10-18 after a walk-forward back-test of the log: the finish-date miss
+// on a 250–500 pp* remainder fell by about a quarter, and a big day now fades
+// out instead of dropping off a window edge. Book-agnostic by design:
+// forecasts everywhere read as "if all subsequent reading went here".
+// Normalized so that time estimates stay honest when the current book's
+// density differs from a target book's: a day of dense Bolaño buys more airy
+// Chambers than raw page math implies.
+export const PACE_HALF_LIFE = 14;
+
+// "Paused": nothing at all logged in the last PAUSE_AFTER days through end.
+// The weighted pace never reaches zero by itself, so this is the one hard edge
+// that keeps a long gap from pushing finish dates into fiction.
+export const PAUSE_AFTER = 14;
+
+// Earliest logged day, or null for an empty log.
+export function firstLogged(entries) {
+  let first = null;
+  for (const e of entries) if (!first || e.date < first) first = e.date;
+  return first;
+}
+
+// The weighted pace at the close of every day from first to end, in whatever
+// unit valueOf(date) returns (0 for a day with nothing logged): [{date, v}].
+// One forward pass; the last point is the forecast's pace in that unit, and
+// the stats chart draws the whole series, so the two can never disagree.
+export function paceSeries(valueOf, first, end, halfLife = PACE_HALF_LIFE) {
+  const decay = Math.pow(0.5, 1 / halfLife);
+  const out = [];
+  let num = 0;
+  let den = 0;
+  for (let d = first; d <= end; d = addDays(d, 1)) {
+    num = num * decay + valueOf(d);
+    den = den * decay + 1;
+    out.push({ date: d, v: num / den });
+  }
+  return out;
+}
+
+// {rate, days, end}: rate in pages*/day; days = length of the log so far (the
+// card calls the estimate "early" while that is shorter than a half-life).
 export function recentPaceDetail(entries, books, gWpp, today) {
-  if (!entries.length) return { rate: 0, denom: 1, end: today };
+  if (!entries.length) return { rate: 0, days: 0, end: today };
   const factorOf = new Map(books.map((b) => [b.id, starFactor(b, gWpp)]));
   const end = effectiveToday(entries, today);
-  let first = entries[0].date;
-  for (const e of entries) if (e.date < first) first = e.date;
-  const denom = Math.min(14, Math.max(1, diffDays(first, end) + 1));
-  const cutoff = addDays(end, -(denom - 1));
-  let star = 0;
+  const first = firstLogged(entries);
+  const star = new Map(); // date → pages* logged that day
+  let lastLogged = null;
   for (const e of entries) {
-    if (e.date >= cutoff && e.date <= end) star += (e.to - e.from) * (factorOf.get(e.book) ?? 1);
+    if (e.date > end) continue;
+    star.set(e.date, (star.get(e.date) || 0) + (e.to - e.from) * (factorOf.get(e.book) ?? 1));
+    if (!lastLogged || e.date > lastLogged) lastLogged = e.date;
   }
-  return { rate: star / denom, denom, end };
+  if (!lastLogged) return { rate: 0, days: 0, end };
+  const days = diffDays(first, end) + 1;
+  if (diffDays(lastLogged, end) >= PAUSE_AFTER) return { rate: 0, days, end };
+  const series = paceSeries((d) => star.get(d) || 0, first, end);
+  return { rate: series[series.length - 1].v, days, end };
 }
 
 // ——— finish forecast ———
 // Universal-pace forecast (Travis's call): the book's remaining pages* at the
 // ALL-books pages*/day pace — "done by X, assuming all subsequent reading goes
 // here." A book idle for weeks still gets a date (the refocus hypothetical);
-// "paused" only means no reading at all in the trailing window.
+// "paused" only means no reading at all in the last PAUSE_AFTER days.
 export function forecast(book, entries, books, gWpp, today) {
   if (!Number.isFinite(book.totalPages) || !book.startDate) return { rate: 0, date: null };
-  const { rate, denom, end } = recentPaceDetail(entries, books, gWpp, today);
-  if (rate <= 0) return { rate: 0, date: null, denom };
+  const { rate, days, end } = recentPaceDetail(entries, books, gWpp, today);
+  if (rate <= 0) return { rate: 0, date: null, days };
   const remaining = book.totalPages - currentPosition(book, entries);
-  if (remaining <= 0) return { rate, date: today, done: true, denom };
+  if (remaining <= 0) return { rate, date: today, done: true, days };
   const daysLeft = Math.ceil((remaining * starFactor(book, gWpp)) / rate);
-  return { rate, date: addDays(end, daysLeft), daysLeft, denom };
+  return { rate, date: addDays(end, daysLeft), daysLeft, days };
 }

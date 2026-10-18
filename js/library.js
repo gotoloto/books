@@ -1,4 +1,4 @@
-import { currentPosition, fmtLong, forecast, starFactor } from "./derive.js";
+import { PACE_HALF_LIFE, PAUSE_AFTER, currentPosition, fmtLong, forecast, starFactor } from "./derive.js";
 import { bookColor } from "./stats.js";
 import {
   isProse, cap, dateWord, fractionWord, lengthWord, paceWord, wppWord,
@@ -32,18 +32,18 @@ function forecastLine(book, state) {
     if (fc.done) return `<p class="forecast">The final page is logged — shelve it.</p>`;
     if (!fc.rate) return `<p class="forecast">Resting lately — nothing logged in a couple of weeks.</p>`;
     if (fc.daysLeft > 730) return `<p class="forecast">At this pace, the ending is a rumor.</p>`;
-    const early = fc.denom < 14 ? " (early days yet)" : "";
+    const early = fc.days < PACE_HALF_LIFE ? " (early days yet)" : "";
     return `<p class="forecast">Reading ${paceWord(fc.rate)} — done by <b>${dateWord(fc.date, state.today)}</b>${early}.</p>`;
   }
   if (fc.done) return `<p class="forecast">Final page logged — shelve it.</p>`;
-  if (!fc.rate) return `<p class="forecast">Forecast paused — no reading in the last 14 days.</p>`;
+  if (!fc.rate) return `<p class="forecast">Forecast paused — no reading in the last ${PAUSE_AFTER} days.</p>`;
   // The card speaks this book's own pages: the universal pp*/day pace divided
   // by the book's factor. The finish date doesn't move — only the rate's unit.
   const bookRate = fc.rate / starFactor(book, state.gWpp);
   if (fc.daysLeft > 730) {
     return `<p class="forecast">Pace ${bookRate.toFixed(1)} pp/day — finish is years out at this pace.</p>`;
   }
-  const early = fc.denom < 14 ? ` — early estimate (${fc.denom}-day sample)` : "";
+  const early = fc.days < PACE_HALF_LIFE ? ` — early estimate (${fc.days}-day sample)` : "";
   return `<p class="forecast">Pace <b>${bookRate.toFixed(1)}</b> pp/day · finish ≈ <b>${fmtLong(fc.date)}</b> (${fc.daysLeft} ${fc.daysLeft === 1 ? "day" : "days"})${early}</p>`;
 }
 

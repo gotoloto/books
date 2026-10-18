@@ -1,6 +1,6 @@
 import {
-  addDays, cumulativeSeries, dailyPoints, diffDays, effectiveToday,
-  fmtLong, fmtShort, perDayTotals, records, starFactor,
+  addDays, cumulativeSeries, dailyPoints, diffDays, effectiveToday, firstLogged,
+  fmtLong, fmtShort, paceSeries, perDayTotals, records, starFactor,
 } from "./derive.js";
 import { renderBars, renderCumulative, renderCumulativeTotal, renderDaily, renderHeatmap } from "./charts.js";
 import {
@@ -300,19 +300,16 @@ function renderCharts(state) {
       segs.sort((x, y) => x.order - y.order);
       return { date, segments: segs, total: segs.reduce((a, s) => a + s.v, 0) };
     });
-  // 7-day rolling mean of the daily totals in the ACTIVE unit (zeros count;
-  // may look back before the window via the full perDay map). An unstarted
-  // today stays out of the line (effectiveToday rule).
+  // The forecast's own pace, drawn: the exponentially weighted mean of the
+  // daily totals in the ACTIVE unit (paceSeries — zeros count), run from the
+  // first logged day so every point carries the full history, then clipped
+  // to the window. In pages* the line ends exactly on the forecast's number.
+  // An unstarted today stays out of the line (effectiveToday rule).
   const paceEnd = we < effEnd ? we : effEnd;
-  const pace = [];
-  for (let d = ws; d <= paceEnd; d = addDays(d, 1)) {
-    let sum = 0;
-    for (let k = 0; k < 7; k++) {
-      const v = perDay.get(addDays(d, -k));
-      if (v) sum += v.v;
-    }
-    pace.push({ date: d, v: sum / 7 });
-  }
+  const first = firstLogged(state.entries);
+  const pace = first && first <= paceEnd
+    ? paceSeries((d) => (perDay.has(d) ? perDay.get(d).v : 0), first, paceEnd).filter((p) => p.date >= ws)
+    : [];
   renderDaily(document.getElementById("chart-b"), days, {
     winStart: ws, winEnd: we, unitLabel, pace, prose: isProse(),
   });

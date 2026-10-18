@@ -263,7 +263,7 @@ mode.** Bucket thresholds in prose.js are editorial and tunable.
 ```
 index.html        tabs: #library #queue #stats (hash-routed, single page)
 css/style.css     palette tokens, chessboard motif, hard edges, serif stack
-js/derive.js      pure math: dates (UTC-safe), wpp, aggregation — has no DOM
+js/derive.js      pure math: dates (UTC-safe), wpp, aggregation, pace model — has no DOM
 js/main.js        fetch (no-cache), router, error banner
 js/library.js     reading cards + finished shelf
 js/queue.js       drag-drop ranking, localStorage `books:queue-order:v2` (drag-only writes)
@@ -302,17 +302,34 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
   recorded day in the active unit (auto-re-anchors when records fall; legendless
   by Travis's call, 2026-08-07 — js/charts.js `heatColor`);
   forecast & queue ETA = the **all-books universal pace in pages*/day**
-  (typesetting-normalized, trailing 14 calendar days, shorter denominator until
-  day 14, zeros included) applied to each book's remaining pages* — i.e., "done by
-  X assuming all subsequent reading goes to this book". Normalized by Travis's call
+  (typesetting-normalized; an **exponentially weighted mean with a 14-day
+  half-life** over every day since Day 0, unlogged days as zero — `paceSeries` +
+  `recentPaceDetail` in js/derive.js) applied to each book's remaining pages* —
+  i.e., "done by X assuming all subsequent reading goes to this book". Normalized by Travis's call
   (2026-08-02): a day of dense reading buys more airy pages than raw math implies.
   Display exception (Travis, 2026-08-02): the **library card** shows that same pace
   divided by the book's factor — the rate in the book's own pages ("pp/day"), since
   a card answers "my rate in this book"; the finish date is identical either way.
   Book-agnostic by Travis's call (2026-07-27); "paused" appears only when nothing
-  at all was logged in the window, never per-book.
+  at all was logged in the last 14 days (`PAUSE_AFTER`), never per-book — the
+  weighted pace never reaches zero on its own, so that cutoff is the one hard edge.
+- **Pace model** (switched 2026-10-18 from a trailing 14-day mean, at Travis's
+  request after a walk-forward back-test of the log): candidates were trailing
+  3–56-day means, medians, trimmed/winsorized means, blends with the all-time
+  mean, Holt, weekday multipliers, and Kalman filters (local level, level+trend,
+  mean-reverting), scored on the pace itself and on the "done by" date for
+  100/250/500 pp* remainders. Daily reading is nearly unpredictable (lag-1
+  autocorrelation 0.2); sprints and breaks are temporary, so longer memory wins:
+  the 14-day half-life cut the finish-date miss on a 500 pp* remainder from ~10
+  to ~8 days, the 7-day mean was clearly worst, trend models hurt, weekday
+  effects and Kalman variants added nothing, and the Kalman uncertainty band was
+  too wide to display. The stats chart's dashed line is the same `paceSeries` in
+  the active unit (it used to be a separate 7-day rolling mean), so in pages* it
+  ends exactly on the forecast's number. Irreducible miss ≈ 3 days on a thin
+  book, a week on a thick one; revisit (and consider a date range) once the log
+  is ~6 months long.
 - **Unstarted-today rule** (`effectiveToday` in js/derive.js): a day with no logged
-  pages joins rate denominators (forecast, queue ETA, rolling pace) only once pages
+  pages joins rate denominators (forecast, queue ETA, the chart's pace line) only once pages
   are logged on it or the calendar moves past it. A quiet morning must not halve
   the pace; a truly skipped day still counts as zero afterward. The same rule
   governs display: chart windows, the cumulative plateau, and the heatmap all end
