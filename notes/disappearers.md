@@ -80,3 +80,7 @@ Jordan tells us that Eddie and Matt may have had a romantic moment post-attack.
 ## 2026-10-09 · pp. 264–280
 
 Some pretty sweaty club scenes. Jordan recognizes someone he is sure he knows and tails him. That part ends on a cliff-hanger. I thought it was going to be one of the attackers, who I guess had been closeted.
+
+## 2026-10-18 · pp. 280–314
+
+I called it with the guy Jordan had recognized… this was a very moving section. Matt is actually Mat.
