@@ -84,3 +84,7 @@ Some pretty sweaty club scenes. Jordan recognizes someone he is sure he knows an
 ## 2026-10-18 · pp. 280–314
 
 I called it with the guy Jordan had recognized… this was a very moving section. Matt is actually Mat.
+
+## 2026-10-18 · pp. 314–327
+
+another gush of violence, but this time they’ve found an underground network to save them?
