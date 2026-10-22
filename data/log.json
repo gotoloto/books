@@ -105,6 +105,7 @@
     { "date": "2026-10-18", "book": "disappearers", "from": 280, "to": 314 },
     { "date": "2026-10-18", "book": "agi-chronicles", "from": 335, "to": 362 },
     { "date": "2026-10-18", "book": "disappearers", "from": 314, "to": 327 },
-    { "date": "2026-10-19", "book": "disappearers", "from": 327, "to": 341 }
+    { "date": "2026-10-19", "book": "disappearers", "from": 327, "to": 341 },
+    { "date": "2026-10-20", "book": "disappearers", "from": 341, "to": 354 }
   ]
 }

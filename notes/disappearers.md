@@ -88,3 +88,7 @@ I called it with the guy Jordan had recognized… this was a very moving section
 ## 2026-10-18 · pp. 314–327
 
 another gush of violence, but this time they’ve found an underground network to save them?
+
+## 2026-10-20 · pp. 341–354
+
+Brutal
