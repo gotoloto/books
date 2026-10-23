@@ -92,3 +92,7 @@ another gush of violence, but this time they’ve found an underground network t
 ## 2026-10-20 · pp. 341–354
 
 Brutal
+
+## 2026-10-22 · pp. 354–374
+
+Bizarre relationship between Jordan and one of the Blackjacks. The latter is so uncomfortable with himself, I'm hoping we see a full unraveling before this section's inevitable end. But Jordan, also, why are you wasting so much time fixing this man.
