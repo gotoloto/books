@@ -172,14 +172,25 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
    "physical copy confirmed", which drops the tilde (js/queue.js `verified`).
 2. `startPage` — 0 unless starting mid-book, `startDate` — first tracked day.
 3. `wordsPerPage` — ask Travis for photos of ~5 representative pages. On his laptop
-   they live under `Page Scans/` (which now also holds the old `<book> pages/`
-   folders; both patterns are gitignored — **page scans must never be committed;
-   the repo is public**). Gitignored folders never reach GitHub, so cloud/mobile
-   sessions cannot see them — there, ask Travis to attach the photos in chat
-   instead (or measure from a laptop session that has the folder). OCR each photo:
-   count text lines exactly, sample several full lines for words-per-line, estimate
-   words per page; average across photos; round to an integer. Show the per-page
-   numbers so Travis can sanity-check. (2666's five pages gave 440/440/436/482/486 → 457.)
+   they live under `Page Scans/<Title> Pages/` (the folder also holds the old
+   `<book> pages/` folders; both patterns are gitignored — **page scans must never
+   be committed; the repo is public**). Measure with
+   `python3 tools/wpp.py "Page Scans/<Title> Pages" --write <id>`: it OCRs each
+   photo with Apple's Vision framework (compiling `tools/wpp_ocr.swift` on first
+   run — macOS with Xcode Command Line Tools only), keeps the body column, drops
+   the facing page's fragments, running heads and folios, prints one line per
+   page and stores the mean. The measure is **the words actually printed on each
+   page, averaged and rounded** — not lines × words-per-line, which runs 2–13%
+   high (calibrated 2026-10-24 against the six books measured by eye before the
+   tool existed: raw counts sat within 2.5% of every stored value). Show Travis
+   the per-page lines so he can veto an unrepresentative page (a newspaper
+   clipping, a chapter end — the tool flags "airy" pages) and rerun without it.
+   Gitignored folders never reach GitHub, so cloud/mobile sessions have neither
+   the scans nor Vision — there, ask Travis to attach the photos in chat and
+   count the words on each page by hand as closely as you can (every line, short
+   ones included), or measure from a laptop session. A planned book may be
+   measured before it starts (The Master and Margarita; the 2026-10-24 batch) —
+   that drops the queue's `~` and shifts the global mean, rescaling history.
 4. `color` — the cover's **accent** color (Travis's call, 2026-09-25: the red
    of 2666's title, the red "TRASH!", Remainder's cyan, the King in Yellow's
    yellow — not whatever color covers the most area, which had made 2666
@@ -275,6 +286,8 @@ data/books.json   one entry per book (see fields above)
 data/log.json     append-only reading log
 notes/<id>.md     reading journal, one file per book — Travis's words, verbatim
 tools/cover_color.py  cover → accent color census (Pillow + numpy; `--write` stores it)
+tools/wpp.py          page scans → wordsPerPage (Vision OCR; `--write <id>` stores it)
+tools/wpp_ocr.swift   the OCR helper wpp.py compiles on first run into tools/.build/ (gitignored)
 covers/*.jpg      local cover images, lowercase filenames
 manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
                   checkerboard icon; deliberately NO service worker — data must
