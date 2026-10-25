@@ -193,6 +193,9 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
    ones included), or measure from a laptop session. A planned book may be
    measured before it starts (The Master and Margarita; the 2026-10-24 batch) —
    that drops the queue's `~` and shifts the global mean, rescaling history.
+   Every measured book has been through the tool except Planet Money (375) and
+   The AGI Chronicles (392), whose by-eye values stand by Travis's call
+   (2026-10-25) — don't offer to re-measure them.
 4. `color` — the cover's **accent** color (Travis's call, 2026-09-25: the red
    of 2666's title, the red "TRASH!", Remainder's cyan, the King in Yellow's
    yellow — not whatever color covers the most area, which had made 2666
