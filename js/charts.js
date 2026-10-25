@@ -162,6 +162,20 @@ function attachCrosshair(f, container, hoverDates, prose, body) {
   f.svg.addEventListener("mouseleave", hide);
 }
 
+// Points sit on reading days only (each one = the total at that day's end), so
+// a straight line between two of them would fake a slow climb across days
+// nothing was read. Hold the previous value until the day before the next
+// point: unlogged days draw flat, and only the reading day itself rises.
+function holdFlat(pts) {
+  const out = [];
+  for (const p of pts) {
+    const prev = out[out.length - 1];
+    if (prev && diffDays(prev.date, p.date) > 1) out.push({ date: addDays(p.date, -1), v: prev.v });
+    out.push(p);
+  }
+  return out;
+}
+
 // ——— Chart A: layered cumulative areas ———
 // series: [{title, color, points:[{date, v}], final}] ALREADY sorted final-desc
 // (largest painted first, so smaller books land on top and stay visible).
@@ -182,7 +196,7 @@ export function renderCumulative(container, series, opts) {
     // so a book that enters mid-window stays flat at 0 until it actually starts.
     const dayBefore = addDays(s.points[0].date, -1);
     const anchor = dayBefore > winStart ? dayBefore : winStart;
-    const pts = [{ date: anchor, v: 0 }, ...s.points];
+    const pts = holdFlat([{ date: anchor, v: 0 }, ...s.points]);
     const last = pts[pts.length - 1];
     // A book that ended (finished/DNF) inside the view stops at flag day with a
     // straight drop to the baseline; only living books extend flat to "now".
@@ -266,7 +280,7 @@ export function renderCumulativeTotal(container, points, opts) {
 
   // Same zero-anchor as the by-book areas: flat at 0 until the first counted day.
   const dayBefore = addDays(points[0].date, -1);
-  const pts = [{ date: dayBefore > winStart ? dayBefore : winStart, v: 0 }, ...points];
+  const pts = holdFlat([{ date: dayBefore > winStart ? dayBefore : winStart, v: 0 }, ...points]);
   const last = pts[pts.length - 1];
   if (last.date < drawEnd) pts.push({ date: drawEnd, v: last.v });
 
