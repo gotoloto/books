@@ -476,6 +476,12 @@
       "color": "#73C7DC"
     },
     {
+      "id": "magic-mountain",
+      "title": "The Magic Mountain",
+      "author": "Thomas Mann",
+      "cover": "covers/magic-mountain.jpg"
+    },
+    {
       "id": "miss-lambert",
       "title": "Miss Lambert Steps Aboard Danger",
       "author": "Kazuo Ishiguro",
