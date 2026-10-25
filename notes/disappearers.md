@@ -96,3 +96,7 @@ Brutal
 ## 2026-10-22 · pp. 354–374
 
 Bizarre relationship between Jordan and one of the Blackjacks. The latter is so uncomfortable with himself, I'm hoping we see a full unraveling before this section's inevitable end. But Jordan, also, why are you wasting so much time fixing this man.
+
+## 2026-10-25 · pp. 406–425
+
+Wow, Jordan really did get his revenge. Long game.
