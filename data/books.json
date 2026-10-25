@@ -145,19 +145,6 @@
       "finishDate": null
     },
     {
-      "id": "infinite-jest",
-      "title": "Infinite Jest",
-      "author": "David Foster Wallace",
-      "totalPages": 1088,
-      "wordsPerPage": null,
-      "cover": "covers/infinite-jest.jpg",
-      "color": "#73C7DC",
-      "status": "planned",
-      "startPage": null,
-      "startDate": null,
-      "finishDate": null
-    },
-    {
       "id": "johnny-reaper",
       "title": "Johnny Reaper: Death Division, Junior Associate",
       "author": "Gepard Gilead",
@@ -453,6 +440,14 @@
       "title": "The Ladies of Grace Adieu",
       "author": "Susanna Clarke",
       "cover": "covers/ladies-of-grace-adieu.jpg"
+    },
+    {
+      "id": "infinite-jest",
+      "title": "Infinite Jest",
+      "author": "David Foster Wallace",
+      "totalPages": 1088,
+      "cover": "covers/infinite-jest.jpg",
+      "color": "#73C7DC"
     },
     {
       "id": "miss-lambert",
