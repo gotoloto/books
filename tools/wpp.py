@@ -30,8 +30,9 @@ How a page is read:
    break counts once.
 
 A page whose words fall under 85% of lines × full-line words is flagged "airy": dialogue, a
-section break, a chapter end, a clipping. It still counts — Travis chose the pages — but the
-flag lets him veto one that isn't representative; rerun with that file left out.
+section break, a chapter end, a clipping. It counts like any other — the pages Travis supplies
+are representative by his choice (a book of short chapters has many chapter ends), so the flag
+is information for the report, never a reason to leave a photo out.
 """
 import argparse
 import json

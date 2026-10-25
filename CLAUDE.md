@@ -183,8 +183,10 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
    page, averaged and rounded** — not lines × words-per-line, which runs 2–13%
    high (calibrated 2026-10-24 against the six books measured by eye before the
    tool existed: raw counts sat within 2.5% of every stored value). Show Travis
-   the per-page lines so he can veto an unrepresentative page (a newspaper
-   clipping, a chapter end — the tool flags "airy" pages) and rerun without it.
+   the per-page lines, but **the pages he supplies are representative by his
+   choice** (Travis, 2026-10-25) — a chapter end, a clipping, an illustrated
+   page are part of how that book reads. The tool's "airy" flag is information,
+   not a prompt to drop a page; never offer to swap his photos out.
    Gitignored folders never reach GitHub, so cloud/mobile sessions have neither
    the scans nor Vision — there, ask Travis to attach the photos in chat and
    count the words on each page by hand as closely as you can (every line, short
