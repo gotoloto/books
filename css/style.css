@@ -252,25 +252,6 @@ em.aside { color: var(--ink-soft); font-size: 15px; }
   letter-spacing: 2px;
   user-select: none;
 }
-/* forthcoming releases: thumbnail + date, nothing more */
-.fc-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 24px;
-  align-items: flex-end;
-}
-.fc-card { width: 104px; }
-.fc-card .cover img { border: 1px solid var(--ink); }
-.fc-card .fc-date {
-  display: block;
-  margin-top: 7px;
-  text-align: center;
-  font-variant-caps: small-caps;
-  letter-spacing: 0.08em;
-  font-size: 12.5px;
-  color: var(--ink-soft);
-}
-
 .q-row.dragging { opacity: 0.45; }
 .q-row.drop-above { box-shadow: 0 -4px 0 0 var(--forest); }
 .q-row.drop-below { box-shadow: 0 4px 0 0 var(--forest); }
@@ -611,6 +592,23 @@ a.spine { text-decoration: none; }
 a.spine:hover .t { text-decoration: underline; text-underline-offset: 2px; }
 a.spine:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
 
+/* ——— wishlist: a cover grid for the bookstore ——— */
+.wl-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 22px 18px;
+  align-items: start;
+}
+.wl-card .wl-date {
+  display: block;
+  margin-top: 7px;
+  text-align: center;
+  font-variant-caps: small-caps;
+  letter-spacing: 0.08em;
+  font-size: 12.5px;
+  color: var(--ink-soft);
+}
+
 /* ——— small screens ——— */
 @media (max-width: 700px) {
   body { font-size: 16px; }
@@ -619,9 +617,11 @@ a.spine:focus-visible { outline: 2px solid var(--forest); outline-offset: 2px; }
   .book-hero { flex-direction: column; gap: 18px; }
   .book-hero .cover { flex-basis: auto; width: 150px; }
   .book-hero h1.book-title { font-size: 28px; }
-  .tabs { gap: 6px; }
-  .tabs a { padding: 5px 12px 7px; letter-spacing: 0.1em; }
+  /* four tabs must fit a 375px phone */
+  .tabs { gap: 6px; padding: 18px 16px 0; }
+  .tabs a { padding: 5px 8px 7px; letter-spacing: 0.06em; font-size: 14px; }
   .q-row .rank { width: 30px; font-size: 19px; }
+  .wl-grid { grid-template-columns: repeat(3, 1fr); gap: 16px 12px; }
   .tile .val { font-size: 27px; }
   .pair { grid-template-columns: 1fr; }
   .pair h2 { margin-top: 10px; }

@@ -3,9 +3,10 @@ import { renderLibrary } from "./library.js";
 import { renderQueue } from "./queue.js";
 import { renderStats } from "./stats.js";
 import { renderBook } from "./book.js";
+import { renderWishlist } from "./wishlist.js";
 import { isProse, toggleProse } from "./prose.js";
 
-const TABS = ["library", "queue", "stats"];
+const TABS = ["library", "queue", "stats", "wishlist"];
 const VIEWS = [...TABS, "book"];
 const state = {};
 
@@ -49,7 +50,7 @@ async function boot() {
     if (!booksRes.ok || !logRes.ok) throw new Error(`HTTP ${booksRes.status}/${logRes.status}`);
     const booksData = await booksRes.json();
     state.books = booksData.books;
-    state.forthcoming = booksData.forthcoming || [];
+    state.wishlist = booksData.wishlist || [];
     state.entries = (await logRes.json()).entries;
   } catch (err) {
     showBanner(
@@ -69,6 +70,7 @@ async function boot() {
   document.body.classList.toggle("prose", isProse());
   renderLibrary(state);
   renderQueue(state);
+  renderWishlist(state);
   route();
 
   window.addEventListener("hashchange", route);
@@ -87,6 +89,7 @@ async function boot() {
       document.body.classList.toggle("prose", isProse());
       renderLibrary(state);
       renderQueue(state);
+      renderWishlist(state);
       if (currentView() === "stats") renderStats(state);
       if (currentView() === "book") renderBook(state, bookId());
     }

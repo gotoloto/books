@@ -235,12 +235,19 @@ cover the same way, and set `totalPages` to the Goodreads record's page count (t
 autocomplete response's `numPages`) so the queue ETA stays honest; other fields null. Array order of planned books = default queue rank
 (browser drag-and-drop order overrides locally via localStorage).
 
-**Forthcoming releases** (unpublished books Travis is waiting on) live in a separate
-`forthcoming` array in books.json — `{id, title, author, totalPages, cover,
-releaseDate}` — rendered beneath the queue as thumbnail + release date only,
-chronological. They are NOT queue entries: excluded from ETA, ranking, shelves, and
-every stat. When one is released and Travis has it, move it into `books` as
-`status:"planned"` (drop `releaseDate`, keep the cover) and it joins the queue.
+**The Wishlist** (2026-10-25; replaced the queue's "Forthcoming Releases" section)
+is its own tab, `#wishlist` — books Travis wants but doesn't own yet, a bare cover
+grid he pulls up in a bookstore. They live in a separate `wishlist` array in
+books.json — `{id, title, author, cover}`, plus `releaseDate` only for a book not
+out yet (and an optional `totalPages`). Released books show the cover alone, in
+array order (append new ones at the end); unreleased ones follow, chronological,
+with their release date under the cover — once that date passes it stops showing
+on its own. Covers follow the same rules as any other (step 6 above; lowercase,
+≤900px, the edition he'd buy — English translations); no `color` needed, there
+are no spines. Wishlist books are NOT queue entries: excluded from ETA, ranking,
+shelves, and every stat. When Travis buys one, move it into `books` as
+`status:"planned"` (drop `releaseDate`, keep the cover, set `totalPages` from
+Goodreads `numPages` and compute its `color`) and it joins the queue.
 
 Queue order does NOT sync between devices (localStorage is per-browser). When Travis
 asks to persist a ranking — by listing it, screenshotting his queue, or "move X to
@@ -277,7 +284,7 @@ mode.** Bucket thresholds in prose.js are editorial and tunable.
 ## Files
 
 ```
-index.html        tabs: #library #queue #stats (hash-routed, single page)
+index.html        tabs: #library #queue #stats #wishlist (hash-routed, single page)
 css/style.css     palette tokens, chessboard motif, hard edges, serif stack
 js/derive.js      pure math: dates (UTC-safe), wpp, aggregation, pace model — has no DOM
 js/main.js        fetch (no-cache), router, error banner
@@ -286,6 +293,7 @@ js/queue.js       drag-drop ranking, localStorage `books:queue-order:v2` (drag-o
 js/charts.js      hand-rolled SVG primitives + tooltip (incl. renderBars, the ranked bar list)
 js/prose.js       prose-mode store + the number→word lexicon
 js/stats.js       records strip, finished-book bar pair, cumulative charts (by book + total), daily scatter, log table, PALETTE
+js/wishlist.js    wishlist tab: cover grid, release dates for unreleased books
 js/book.js        per-book page (#book/<id>): hero, how the reading went, the journal
 data/books.json   one entry per book (see fields above)
 data/log.json     append-only reading log

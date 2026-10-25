@@ -405,7 +405,55 @@
       "finishDate": null
     }
   ],
-  "forthcoming": [
+  "wishlist": [
+    {
+      "id": "maddaddam",
+      "title": "MaddAddam",
+      "author": "Margaret Atwood",
+      "cover": "covers/maddaddam.jpg"
+    },
+    {
+      "id": "solenoid",
+      "title": "Solenoid",
+      "author": "Mircea Cărtărescu",
+      "cover": "covers/solenoid.jpg"
+    },
+    {
+      "id": "europe-central",
+      "title": "Europe Central",
+      "author": "William T. Vollmann",
+      "cover": "covers/europe-central.jpg"
+    },
+    {
+      "id": "broom-of-the-system",
+      "title": "The Broom of the System",
+      "author": "David Foster Wallace",
+      "cover": "covers/broom-of-the-system.jpg"
+    },
+    {
+      "id": "brothers-karamazov",
+      "title": "The Brothers Karamazov",
+      "author": "Fyodor Dostoevsky",
+      "cover": "covers/brothers-karamazov.jpg"
+    },
+    {
+      "id": "wuthering-heights",
+      "title": "Wuthering Heights",
+      "author": "Emily Brontë",
+      "cover": "covers/wuthering-heights.jpg"
+    },
+    {
+      "id": "butchers-crossing",
+      "title": "Butcher's Crossing",
+      "author": "John Williams",
+      "cover": "covers/butchers-crossing.jpg"
+    },
+    {
+      "id": "ladies-of-grace-adieu",
+      "title": "The Ladies of Grace Adieu",
+      "author": "Susanna Clarke",
+      "cover": "covers/ladies-of-grace-adieu.jpg"
+    },
     {
       "id": "miss-lambert",
       "title": "Miss Lambert Steps Aboard Danger",

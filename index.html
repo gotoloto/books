@@ -23,6 +23,7 @@
     <a href="#library" role="tab" id="tab-library" aria-controls="view-library" aria-selected="true">Library</a>
     <a href="#queue"   role="tab" id="tab-queue"   aria-controls="view-queue"   aria-selected="false">Queue</a>
     <a href="#stats"   role="tab" id="tab-stats"   aria-controls="view-stats"   aria-selected="false">Stats</a>
+    <a href="#wishlist" role="tab" id="tab-wishlist" aria-controls="view-wishlist" aria-selected="false">Wishlist</a>
   </nav>
 </header>
 
@@ -43,7 +44,6 @@
     <p class="queue-hint">Drag to reorder. The ranking is stored in this browser only.</p>
     <div id="queue-eta"></div>
     <ol id="queue-list"></ol>
-    <div id="forthcoming-section"></div>
   </section>
 
   <section id="view-stats" class="view" role="tabpanel" aria-labelledby="tab-stats" hidden>
@@ -82,6 +82,10 @@
 
     <div id="unit-dock" class="unit-dock"></div>
     <p id="norm-note" class="footnote"></p>
+  </section>
+  <section id="view-wishlist" class="view" role="tabpanel" aria-labelledby="tab-wishlist" hidden>
+    <h2>Wishlist</h2>
+    <div id="wishlist-grid" class="wl-grid"></div>
   </section>
   <section id="view-book" class="view" role="region" aria-label="Book" hidden>
     <div id="book-page"></div>
