@@ -110,6 +110,7 @@
     { "date": "2026-10-22", "book": "disappearers", "from": 354, "to": 374 },
     { "date": "2026-10-23", "book": "disappearers", "from": 374, "to": 390 },
     { "date": "2026-10-24", "book": "disappearers", "from": 390, "to": 406 },
-    { "date": "2026-10-25", "book": "disappearers", "from": 406, "to": 425 }
+    { "date": "2026-10-25", "book": "disappearers", "from": 406, "to": 425 },
+    { "date": "2026-10-25", "book": "disappearers", "from": 425, "to": 446 }
   ]
 }

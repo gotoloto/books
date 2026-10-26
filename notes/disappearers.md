@@ -100,3 +100,7 @@ Bizarre relationship between Jordan and one of the Blackjacks. The latter is so 
 ## 2026-10-25 · pp. 406–425
 
 Wow, Jordan really did get his revenge. Long game.
+
+## 2026-10-25 · pp. 425–446
+
+this is Havelock’s boarding school days.
