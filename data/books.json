@@ -494,6 +494,18 @@
       "title": "Tinker, Tailor, Soldier, Spy",
       "author": "John le Carré",
       "cover": "covers/tinker-tailor-soldier-spy.jpg"
+    },
+    {
+      "id": "exit-party",
+      "title": "Exit Party",
+      "author": "Emily St. John Mandel",
+      "cover": "covers/exit-party.jpg"
+    },
+    {
+      "id": "the-castle",
+      "title": "The Castle: Adventures in a World of Unraveling Men",
+      "author": "Jon Ronson",
+      "cover": "covers/the-castle.jpg"
     }
   ]
 }
