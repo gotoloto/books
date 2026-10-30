@@ -488,6 +488,12 @@
       "totalPages": 240,
       "cover": "covers/miss-lambert.jpg",
       "releaseDate": "2027-03-09"
+    },
+    {
+      "id": "tinker-tailor-soldier-spy",
+      "title": "Tinker, Tailor, Soldier, Spy",
+      "author": "John le Carré",
+      "cover": "covers/tinker-tailor-soldier-spy.jpg"
     }
   ]
 }
