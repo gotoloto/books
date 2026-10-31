@@ -7,3 +7,7 @@ Apparently raisin growers are in a cartel and it’s sometimes good sometimes ba
 ## 2026-10-29 · pp. 54–90
 
 GDP, then equity/salary, then agglomeration economics
+
+## 2026-10-30 · pp. 90–108
+
+Contracting vs salary
