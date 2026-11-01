@@ -11,3 +11,7 @@ GDP, then equity/salary, then agglomeration economics
 ## 2026-10-30 · pp. 90–108
 
 Contracting vs salary
+
+## 2026-10-31 · pp. 108–110
+
+ATMs and automation part 1
