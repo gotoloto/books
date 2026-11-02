@@ -15,3 +15,7 @@ Contracting vs salary
 ## 2026-10-31 · pp. 108–110
 
 ATMs and automation part 1
+
+## 2026-11-01 · pp. 110–130
+
+matching markets
