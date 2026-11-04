@@ -104,3 +104,7 @@ Wow, Jordan really did get his revenge. Long game.
 ## 2026-10-25 · pp. 425–446
 
 this is Havelock’s boarding school days.
+
+## 2026-11-03 · pp. 446–458
+
+We continue through Havelock's letters, boy is he eloquent.
