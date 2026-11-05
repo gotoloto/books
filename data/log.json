@@ -117,6 +117,7 @@
     { "date": "2026-10-31", "book": "planet-money", "from": 108, "to": 110 },
     { "date": "2026-11-01", "book": "planet-money", "from": 110, "to": 130 },
     { "date": "2026-11-02", "book": "planet-money", "from": 130, "to": 140 },
-    { "date": "2026-11-03", "book": "disappearers", "from": 446, "to": 458 }
+    { "date": "2026-11-03", "book": "disappearers", "from": 446, "to": 458 },
+    { "date": "2026-11-04", "book": "disappearers", "from": 458, "to": 472 }
   ]
 }
