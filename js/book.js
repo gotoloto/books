@@ -10,7 +10,7 @@ import {
   addDays, currentPosition, diffDays, effectiveToday, fmtLong, fmtShort, starFactor,
 } from "./derive.js";
 import { bookColor } from "./stats.js";
-import { pagesStar, squareBar } from "./library.js";
+import { pagesStar, squareBar, squareCount } from "./library.js";
 import {
   isProse, cap, dateWord, durationWord, fractionWord, frequencyWord, lengthWord,
   paceWord, sessionWord, wppWord,
@@ -163,7 +163,7 @@ function hero(b, state) {
   }
   const pct = Number.isFinite(b.totalPages) ? (pos / b.totalPages) * 100 : 0;
   const bar = b.status === "reading"
-    ? squareBar(pct, isProse() ? fractionWord(pos / b.totalPages) : pct.toFixed(1) + "% read")
+    ? squareBar(pct, isProse() ? fractionWord(pos / b.totalPages) : pct.toFixed(1) + "% read", squareCount(b, state.books, state.gWpp))
     : "";
   return `
   <p class="crumb">${back}</p>

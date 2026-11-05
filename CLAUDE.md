@@ -371,4 +371,12 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
   pages (2666's untracked 1–410 excluded, as everywhere) ÷ that span, in the
   page-wide unit. Finished books only, each chart ranked largest-first on its
   own measure. Prose mode speaks in `durationWord` / `paceWord`.
+- **Progress squares** (Library card + book hero; `squareCount`/`squareBar` in
+  js/library.js, 2026-11-05): the bar's square count scales linearly with the
+  book's pages* — the longest book in books.json (any status; Don Quixote today)
+  gets 34 squares, the rest a proportional share, floor 1, no other clamp (The
+  King in Yellow ≈ 2). Computed at render time, so a new longest book or a wpp
+  shift rescales every bar. 34 squares fit one desktop row (`.sq-bar` max-width);
+  a phone wraps them to two. Wishlist books aren't in `books`, so they never set
+  the scale.
 - Keep this file updated when workflows change.

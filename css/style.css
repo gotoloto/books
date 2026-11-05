@@ -169,7 +169,8 @@ em.aside { color: var(--ink-soft); font-size: 15px; }
   flex-wrap: wrap;
   gap: 3px;
   margin: 12px 0 14px;
-  max-width: 560px;
+  /* the longest book's 34 squares on a single desktop row; phones wrap to two */
+  max-width: calc(34 * 15px + 33 * 3px);
 }
 .sq {
   width: 15px;

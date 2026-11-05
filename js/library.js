@@ -4,7 +4,13 @@ import {
   isProse, cap, dateWord, fractionWord, lengthWord, paceWord, wppWord,
 } from "./prose.js";
 
-const SQUARES = 30;
+// The progress bar's square count scales with the book's length in pages*:
+// the longest book on the shelves (any status — Don Quixote today) gets
+// SQUARES_MAX, every other book a proportional share, floor 1, no other
+// clamp — the bar is honest to the book the way a spine's width is. Computed
+// at render time like every pages* figure, so a new longest book or a wpp
+// shift rescales every bar.
+const SQUARES_MAX = 34;
 
 function esc(s) {
   return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -15,11 +21,18 @@ export function pagesStar(book, gWpp) {
   return Math.round(book.totalPages * starFactor(book, gWpp));
 }
 
-export function squareBar(pct, ariaLabel) {
-  const filled = Math.floor((pct / 100) * SQUARES);
-  const frac = (pct / 100) * SQUARES - filled;
+export function squareCount(book, books, gWpp) {
+  const star = pagesStar(book, gWpp);
+  const longest = Math.max(0, ...books.map((b) => pagesStar(b, gWpp) ?? 0));
+  if (!star || !longest) return SQUARES_MAX;
+  return Math.max(1, Math.round((SQUARES_MAX * star) / longest));
+}
+
+export function squareBar(pct, ariaLabel, n = SQUARES_MAX) {
+  const filled = Math.floor((pct / 100) * n);
+  const frac = (pct / 100) * n - filled;
   let html = '<div class="sq-bar" role="img" aria-label="' + esc(ariaLabel) + '">';
-  for (let i = 0; i < SQUARES; i++) {
+  for (let i = 0; i < n; i++) {
     const cls = i < filled ? "sq on" : i === filled && frac >= 0.5 ? "sq half" : "sq";
     html += `<div class="${cls}"></div>`;
   }
@@ -72,7 +85,7 @@ function readingCard(book, state) {
       <h3 class="book-title"><a class="book-link" href="#book/${esc(book.id)}">${esc(book.title)}</a></h3>
       <p class="book-author">${esc(book.author)}</p>
       <p class="pos-line">${posLine}</p>
-      ${squareBar(pct, isProse() ? frac : pct.toFixed(1) + "% read")}
+      ${squareBar(pct, isProse() ? frac : pct.toFixed(1) + "% read", squareCount(book, state.books, state.gWpp))}
       ${forecastLine(book, state)}
       <div class="fact-row">${facts}
         <a class="jump" href="#book/${esc(book.id)}">journal →</a>
