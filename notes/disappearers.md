@@ -112,3 +112,7 @@ We continue through Havelock's letters, boy is he eloquent.
 ## 2026-11-04 · pp. 458–472
 
 Havelock makes ends meet as an Oxford student.
+
+## 2026-11-05 · pp. 472–490
+
+Havelock writes one letter in which the slang goes hard, not sure why that happens, and he seems to be on the verge of breaking up with his friend Mark. Kind of weird that Havelock only talks about himself in these letters. Mark presumably exists as he responds to specifics like his "condescension" and we are told a couple of times that Mark was Havelock's uh... boss. And Havelock sounds like he has a very cozy but lonely single life. Shame what seems to have been his best prospect of a life partner he would not bail out but it was life or death thinking.
