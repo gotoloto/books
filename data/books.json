@@ -506,6 +506,24 @@
       "title": "The Castle: Adventures in a World of Unraveling Men",
       "author": "Jon Ronson",
       "cover": "covers/the-castle.jpg"
+    },
+    {
+      "id": "are-you-experienced",
+      "title": "Are You Experienced?",
+      "author": "William Sutcliffe",
+      "cover": "covers/are-you-experienced.jpg"
+    },
+    {
+      "id": "chronicle-of-a-death-foretold",
+      "title": "Chronicle of a Death Foretold",
+      "author": "Gabriel García Márquez",
+      "cover": "covers/chronicle-of-a-death-foretold.jpg"
+    },
+    {
+      "id": "frankenstein",
+      "title": "Frankenstein",
+      "author": "Mary Shelley",
+      "cover": "covers/frankenstein.jpg"
     }
   ]
 }
