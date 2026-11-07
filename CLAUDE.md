@@ -244,7 +244,10 @@ array order (append new ones at the end); unreleased ones follow, chronological,
 with their release date under the cover — once that date passes it stops showing
 on its own. Covers follow the same rules as any other (step 6 above; lowercase,
 ≤900px, the edition he'd buy — English translations); no `color` needed, there
-are no spines. Wishlist books are NOT queue entries: excluded from ETA, ranking,
+are no spines. A book with no cover art yet (Lambing Season, 2026-11-07) gets a
+placeholder in the site's own dress from `tools/placeholder_cover.py` (Pillow;
+title, author, checkerboard strips) — overwrite the jpg when the real cover
+lands. Wishlist books are NOT queue entries: excluded from ETA, ranking,
 shelves, and every stat. When Travis buys one, move it into `books` as
 `status:"planned"` (drop `releaseDate`, keep the cover, set `totalPages` from
 Goodreads `numPages` and compute its `color`) and it joins the queue.

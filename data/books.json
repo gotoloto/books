@@ -537,6 +537,13 @@
       "title": "Perfection",
       "author": "Vincenzo Latronico",
       "cover": "covers/perfection.jpg"
+    },
+    {
+      "id": "lambing-season",
+      "title": "Lambing Season",
+      "author": "August Lamm",
+      "cover": "covers/lambing-season.jpg",
+      "releaseDate": "2027-02-11"
     }
   ]
 }
