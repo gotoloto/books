@@ -531,6 +531,12 @@
       "author": "Ben Lerner",
       "cover": "covers/transcription.jpg",
       "releaseDate": "2027-04-06"
+    },
+    {
+      "id": "perfection",
+      "title": "Perfection",
+      "author": "Vincenzo Latronico",
+      "cover": "covers/perfection.jpg"
     }
   ]
 }
