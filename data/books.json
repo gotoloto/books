@@ -544,6 +544,12 @@
       "author": "August Lamm",
       "cover": "covers/lambing-season.jpg",
       "releaseDate": "2027-02-11"
+    },
+    {
+      "id": "helen-of-nowhere",
+      "title": "Helen of Nowhere",
+      "author": "Makenna Goodman",
+      "cover": "covers/helen-of-nowhere.jpg"
     }
   ]
 }
