@@ -524,6 +524,13 @@
       "title": "Frankenstein",
       "author": "Mary Shelley",
       "cover": "covers/frankenstein.jpg"
+    },
+    {
+      "id": "transcription",
+      "title": "Transcription",
+      "author": "Ben Lerner",
+      "cover": "covers/transcription.jpg",
+      "releaseDate": "2027-04-06"
     }
   ]
 }
