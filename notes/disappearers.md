@@ -120,3 +120,7 @@ Havelock writes one letter in which the slang goes hard, not sure why that happe
 ## 2026-11-06 · pp. 490–528
 
 We end the section from Havelock's letters. He is such a sad miserable man. He was too mean to Eddy.
+
+## 2026-11-06 · pp. 528–538
+
+We are back in Jordan's head in 2005 and he is now mentally unstable. He has Streggeh Don with him, which I had to flip back to the Blackjacks section to reverify he was really with the group in the flesh and not just spiritually.
