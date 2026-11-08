@@ -128,3 +128,7 @@ We are back in Jordan's head in 2005 and he is now mentally unstable. He has Str
 ## 2026-11-07 · pp. 538–581
 
 This session included the reveal that Jordan's been living with a corpse! Loved that moment
+
+## 2026-11-07 · pp. 581–613
+
+And fin. We trace the arc of Matt Chin, not what I was suspecting -- I think a cross he was wearing did get referenced. For most of this section you don't even really know who you're following until physical characteristics are named. So he was mysterious because he was super closeted. The ending did not make me cry, but it did make me feel very sad that Eddie nearly forgot about him. Nearly. He just needed to say more explicitly who he was, which was a big step for Matt. I'm glad to have found out he made it through. Jordan and Orrin on the other hand -- Jordan we figure gets institutionalized, at best. OVERALL - I am very satisfied with the book, it was creative in structure, and the lessons will stay with me.

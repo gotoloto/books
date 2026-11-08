@@ -22,10 +22,10 @@
       "wordsPerPage": 383,
       "cover": "covers/disappearers.jpg",
       "color": "#C5890F",
-      "status": "reading",
+      "status": "finished",
       "startPage": 0,
       "startDate": "2026-09-13",
-      "finishDate": null
+      "finishDate": "2026-11-07"
     },
     {
       "id": "remainder",
