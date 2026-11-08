@@ -124,3 +124,7 @@ We end the section from Havelock's letters. He is such a sad miserable man. He w
 ## 2026-11-06 · pp. 528–538
 
 We are back in Jordan's head in 2005 and he is now mentally unstable. He has Streggeh Don with him, which I had to flip back to the Blackjacks section to reverify he was really with the group in the flesh and not just spiritually.
+
+## 2026-11-07 · pp. 538–581
+
+This session included the reveal that Jordan's been living with a corpse! Loved that moment
