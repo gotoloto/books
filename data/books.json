@@ -429,6 +429,45 @@
       "startPage": null,
       "startDate": null,
       "finishDate": null
+    },
+    {
+      "id": "perfection",
+      "title": "Perfection",
+      "author": "Vincenzo Latronico",
+      "totalPages": 124,
+      "wordsPerPage": 267,
+      "cover": "covers/perfection.jpg",
+      "color": "#B3B7AE",
+      "status": "planned",
+      "startPage": null,
+      "startDate": null,
+      "finishDate": null
+    },
+    {
+      "id": "transcription",
+      "title": "Transcription",
+      "author": "Ben Lerner",
+      "totalPages": 130,
+      "wordsPerPage": 273,
+      "cover": "covers/transcription.jpg",
+      "color": "#BA8855",
+      "status": "planned",
+      "startPage": null,
+      "startDate": null,
+      "finishDate": null
+    },
+    {
+      "id": "chronicle-of-a-death-foretold",
+      "title": "Chronicle of a Death Foretold",
+      "author": "Gabriel García Márquez",
+      "totalPages": 120,
+      "wordsPerPage": 271,
+      "cover": "covers/chronicle-of-a-death-foretold.jpg",
+      "color": "#A53036",
+      "status": "planned",
+      "startPage": null,
+      "startDate": null,
+      "finishDate": null
     }
   ],
   "wishlist": [
@@ -527,29 +566,10 @@
       "cover": "covers/are-you-experienced.jpg"
     },
     {
-      "id": "chronicle-of-a-death-foretold",
-      "title": "Chronicle of a Death Foretold",
-      "author": "Gabriel García Márquez",
-      "cover": "covers/chronicle-of-a-death-foretold.jpg"
-    },
-    {
       "id": "frankenstein",
       "title": "Frankenstein",
       "author": "Mary Shelley",
       "cover": "covers/frankenstein.jpg"
-    },
-    {
-      "id": "transcription",
-      "title": "Transcription",
-      "author": "Ben Lerner",
-      "cover": "covers/transcription.jpg",
-      "releaseDate": "2027-04-06"
-    },
-    {
-      "id": "perfection",
-      "title": "Perfection",
-      "author": "Vincenzo Latronico",
-      "cover": "covers/perfection.jpg"
     },
     {
       "id": "lambing-season",
