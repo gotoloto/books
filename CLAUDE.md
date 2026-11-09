@@ -317,6 +317,10 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
 - All repo filenames lowercase; all URLs relative (site lives under `/books/`).
 - 2666 baseline: tracking started at p. 410 of 893 on Day 0 — pages 1–410
   intentionally never appear in stats; the library card still shows true position.
+- The Call of the Wild counts as 100 pages by Travis's call (2026-11-08): 18
+  roman-numeral intro pages + 82 of text. Log positions run 0–100, so text page
+  N is position N + 18 — a report of "text pp. 20–45" logs as 38 → 63. If a
+  report's numbers don't line up with that offset, ask.
 - Local preview: `python3 -m http.server 8123` (or the `books-site` launch config) —
   `fetch()` and ES modules don't work over `file://`.
 - Cumulative chart layering: series sort by final value descending so big books
