@@ -215,7 +215,9 @@ Collect/derive, then fill the book's entry (planned books already exist with nul
    2% of it), rerun with `--min-share 0` so the title's clusters qualify and
    the usual score chooses among them; that color survives only targeted runs,
    so a blanket `--write` over every cover would put the black back — always
-   pass ids. Spine text picks ink vs eggshell by WCAG contrast (js/library.js
+   pass ids. Perfection's #B4696B (2026-11-08) is hand-sampled — the pink
+  streaks of the lilies, Travis's pick over the tool's gray — and no flag
+  reproduces it, so never rerun `--write` on `perfection`. Spine text picks ink vs eggshell by WCAG contrast (js/library.js
    `relLum`). `PALETTE` in js/stats.js remains
    only as the fallback for books with no stored color.
 5. `status: "reading"`.
