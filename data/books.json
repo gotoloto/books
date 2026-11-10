@@ -583,6 +583,13 @@
       "title": "Helen of Nowhere",
       "author": "Makenna Goodman",
       "cover": "covers/helen-of-nowhere.jpg"
+    },
+    {
+      "id": "end-of-everything",
+      "title": "The End of Everything",
+      "author": "M. John Harrison",
+      "totalPages": 208,
+      "cover": "covers/end-of-everything.jpg"
     }
   ]
 }
