@@ -35,10 +35,10 @@
       "wordsPerPage": 410,
       "cover": "covers/call-of-the-wild.jpg",
       "color": "#AAAAAB",
-      "status": "reading",
+      "status": "finished",
       "startPage": 0,
       "startDate": "2026-11-08",
-      "finishDate": null
+      "finishDate": "2026-11-11"
     },
     {
       "id": "remainder",
@@ -408,13 +408,13 @@
       "id": "lucky-jim",
       "title": "Lucky Jim",
       "author": "Kingsley Amis",
-      "totalPages": 265,
+      "totalPages": 285,
       "wordsPerPage": 361,
       "cover": "covers/lucky-jim.jpg",
       "color": "#A4C581",
-      "status": "planned",
-      "startPage": null,
-      "startDate": null,
+      "status": "reading",
+      "startPage": 0,
+      "startDate": "2026-11-11",
       "finishDate": null
     },
     {

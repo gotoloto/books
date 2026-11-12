@@ -323,6 +323,9 @@ manifest.webmanifest + icons/   iOS/Android home-screen install (standalone PWA,
   roman-numeral intro pages + 82 of text. Log positions run 0–100, so text page
   N is position N + 18 — a report of "text pp. 20–45" logs as 38 → 63. If a
   report's numbers don't line up with that offset, ask.
+- Lucky Jim works the same way (2026-11-11): a 20-page introduction outside the
+  book's own numbering, so `totalPages` = last text page + 20 and text page N
+  is position N + 20.
 - Local preview: `python3 -m http.server 8123` (or the `books-site` launch config) —
   `fetch()` and ES modules don't work over `file://`.
 - Cumulative chart layering: series sort by final value descending so big books
