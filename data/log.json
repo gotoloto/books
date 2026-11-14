@@ -130,6 +130,7 @@
     { "date": "2026-11-09", "book": "call-of-the-wild", "from": 56, "to": 76 },
     { "date": "2026-11-10", "book": "call-of-the-wild", "from": 76, "to": 88 },
     { "date": "2026-11-11", "book": "call-of-the-wild", "from": 88, "to": 100 },
-    { "date": "2026-11-11", "book": "lucky-jim", "from": 0, "to": 20 }
+    { "date": "2026-11-11", "book": "lucky-jim", "from": 0, "to": 20 },
+    { "date": "2026-11-12", "book": "lucky-jim", "from": 20, "to": 28 }
   ]
 }
